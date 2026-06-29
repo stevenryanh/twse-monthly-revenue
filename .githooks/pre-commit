@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# 軟性機密掃描：裝了 gitleaks 才掃，沒裝只提醒、不擋 commit。
+# 啟用一次：git config core.hooksPath .githooks
+set -euo pipefail
+
+if command -v gitleaks >/dev/null 2>&1; then
+    if ! gitleaks protect --staged --redact --no-banner; then
+        echo "✗ gitleaks 在暫存內容中偵測到疑似機密，已擋下 commit。"
+        echo "  如為誤判，可用 git commit --no-verify 跳過（請先確認真的不是機密）。"
+        exit 1
+    fi
+else
+    echo "ℹ️ 未安裝 gitleaks，略過機密掃描（建議：brew install gitleaks 以啟用防呆）。"
+fi

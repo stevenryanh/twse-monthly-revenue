@@ -1,0 +1,22 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+
+# Node / Vite
+node_modules/
+dist/
+*.local
+
+# IDE
+.vs/
+.vscode/
+.idea/
+
+# Secrets（.env.example 仍會被追蹤）
+.env
+
+# OS
+.DS_Store
+Thumbs.db
