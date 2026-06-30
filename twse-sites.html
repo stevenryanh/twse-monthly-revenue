@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TWSE Sites</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 680px; margin: 50px auto; padding: 0 20px; background: #f5f5f5; color: #222; }
+    h1 { font-size: 1.4rem; color: #333; margin-bottom: 4px; }
+    .sub { color: #888; font-size: .82rem; margin: 0 0 8px; }
+    .section-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #999; margin: 22px 0 8px; }
+    ul { list-style: none; padding: 0; margin: 0; }
+    li { background: #fff; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.1); overflow: hidden; }
+    .row { display: flex; align-items: center; gap: 14px; padding: 12px 16px; cursor: pointer; }
+    .row:hover { background: #f5f5f5; }
+    .icon { width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0; }
+    .info { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+    .label { font-weight: 600; color: #222; font-size: 0.95rem; }
+    .url { color: #888; font-size: 0.78rem; font-family: monospace; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .badges { display: flex; gap: 5px; flex-shrink: 0; align-items: center; }
+    .badge { font-size: 0.7rem; padding: 2px 7px; border-radius: 4px; font-weight: 600; }
+    .web    { background: #e8f5e9; color: #1b5e20; }
+    .api    { background: #e3f2fd; color: #1565c0; }
+    .db     { background: #fce4ec; color: #ad1457; }
+    .get    { background: #e0f2f1; color: #00695c; }
+    .post   { background: #fff3e0; color: #e65100; }
+    .devonly{ background: #ffebee; color: #c62828; font-size: .65rem; }
+    .cmd-row { display: flex; align-items: center; gap: 14px; padding: 12px 16px; cursor: pointer; }
+    .cmd-row:hover { background: #f5f5f5; }
+    .cmd-icon { width: 40px; height: 40px; border-radius: 10px; background: #263238; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; color: #fff; }
+    .cmd-info { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+    .cmd-label { font-weight: 600; color: #222; font-size: 0.92rem; }
+    .cmd-code { color: #555; font-size: 0.76rem; font-family: monospace; margin-top: 3px; background: #f3f4f6; padding: 3px 7px; border-radius: 4px; display: inline-block; white-space: pre-wrap; word-break: break-all; }
+    .copy-btn { background: none; border: 1px solid #ddd; border-radius: 6px; padding: 4px 10px; cursor: pointer; color: #666; font-size: 0.75rem; flex-shrink: 0; }
+    .copy-btn:hover { background: #e8f5e9; border-color: #81c784; color: #2e7d32; }
+    .copy-btn.copied { background: #e8f5e9; border-color: #81c784; color: #2e7d32; }
+    .note { font-size: .76rem; color: #888; background: #fff; border-radius: 10px; padding: 10px 14px; box-shadow: 0 1px 3px rgba(0,0,0,.1); margin-bottom: 10px; line-height: 1.6; }
+    .note code { background: #f3f4f6; padding: 1px 5px; border-radius: 3px; font-size: .72rem; }
+    .foot { color: #aaa; font-size: .72rem; text-align: center; margin: 26px 0 10px; }
+  </style>
+</head>
+<body>
+  <h1>TWSE 每月營收 — 開發站台</h1>
+  <p class="sub">本機開發入口：服務連結、API 測試、常用指令。用 <code>file://</code> 直接開即可。</p>
+
+  <!-- ───── 服務連結 ───── -->
+  <p class="section-label">服務連結</p>
+  <ul>
+    <li>
+      <div class="row" onclick="go('http://localhost:5173')">
+        <svg class="icon" viewBox="0 0 100 100"><rect width="100" height="100" rx="18" fill="#1B5E20"/><path d="M30 32 L50 70 L70 32" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="info"><span class="label">前端 Web（Vite dev server）</span><span class="url">http://localhost:5173</span></span>
+        <span class="badges"><span class="badge web">Vue 3</span></span>
+      </div>
+    </li>
+    <li>
+      <div class="row" onclick="go('http://localhost:5080/api/revenues/2330')">
+        <svg class="icon" viewBox="0 0 100 100"><rect width="100" height="100" rx="18" fill="#1565C0"/><circle cx="50" cy="50" r="9" fill="#fff"/><g stroke="#fff" stroke-width="3" stroke-linecap="round"><line x1="50" y1="50" x2="24" y2="32"/><line x1="50" y1="50" x2="76" y2="32"/><line x1="50" y1="50" x2="24" y2="68"/><line x1="50" y1="50" x2="76" y2="68"/></g><g fill="#fff"><circle cx="24" cy="32" r="5"/><circle cx="76" cy="32" r="5"/><circle cx="24" cy="68" r="5"/><circle cx="76" cy="68" r="5"/></g></svg>
+        <span class="info"><span class="label">API（範例：查 2330）</span><span class="url">http://localhost:5080/api/revenues/2330</span></span>
+        <span class="badges"><span class="badge api">.NET 6</span></span>
+      </div>
+    </li>
+    <li>
+      <div class="row" onclick="go('http://localhost:5080/swagger')">
+        <svg class="icon" viewBox="0 0 100 100"><rect width="100" height="100" rx="18" fill="#85ad00"/><circle cx="50" cy="50" r="24" fill="none" stroke="#fff" stroke-width="6"/><circle cx="50" cy="50" r="6" fill="#fff"/></svg>
+        <span class="info"><span class="label">Swagger UI</span><span class="url">http://localhost:5080/swagger</span></span>
+        <span class="badges"><span class="badge devonly">僅 Development</span></span>
+      </div>
+    </li>
+  </ul>
+
+  <div class="note">
+    ⚠️ <strong>Swagger 與 CORS 只在 Development 環境開啟。</strong><code>./dev.sh</code> 以 <code>--no-launch-profile</code> 啟動（落在 Production），所以 <code>/swagger</code> 會 404、前端跨來源也未放行。要啟用兩者，改用下方「開發指令」裡的 <em>Development 模式啟動 API</em>。
+  </div>
+
+  <!-- ───── API 測試入口 ───── -->
+  <p class="section-label">API 測試入口</p>
+  <ul>
+    <li>
+      <div class="cmd-row" onclick="copyCmd('curl-get')">
+        <span class="badge get" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:10px;font-size:.72rem">GET</span>
+        <span class="cmd-info">
+          <span class="cmd-label">查詢某公司各月營收（最新月在前）</span>
+          <span class="cmd-code" id="curl-get">curl http://localhost:5080/api/revenues/2330</span>
+        </span>
+        <button class="copy-btn" id="copy-curl-get" onclick="copyCmd('curl-get',event)">複製</button>
+      </div>
+    </li>
+    <li>
+      <div class="cmd-row" onclick="copyCmd('curl-post')">
+        <span class="badge post" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:10px;font-size:.7rem">POST</span>
+        <span class="cmd-info">
+          <span class="cmd-label">新增一筆營收（依主鍵 upsert）</span>
+          <span class="cmd-code" id="curl-post">curl -X POST http://localhost:5080/api/revenues \
+  -H "Content-Type: application/json" \
+  -d '{
+    "companyCode": "2330",
+    "dataYearMonth": 202405,
+    "reportDate": 20240610,
+    "companyName": "台積電",
+    "industry": "半導體",
+    "currentMonthRevenue": 176540000,
+    "lastMonthRevenue": 159000000,
+    "lastYearMonthRevenue": 132000000,
+    "moMPercent": 11.03,
+    "yoYPercent": 33.74,
+    "cumCurrentRevenue": 800000000,
+    "cumLastYearRevenue": 600000000,
+    "cumDiffPercent": 33.33,
+    "remark": "測試資料"
+  }'</span>
+        </span>
+        <button class="copy-btn" id="copy-curl-post" onclick="copyCmd('curl-post',event)">複製</button>
+      </div>
+    </li>
+  </ul>
+
+  <!-- ───── 開發指令 ───── -->
+  <p class="section-label">開發指令</p>
+  <ul>
+    <li>
+      <div class="cmd-row" onclick="copyCmd('cmd-start')">
+        <div class="cmd-icon">▶</div>
+        <span class="cmd-info"><span class="cmd-label">啟動全部（DB + API + Web，先殺舊 process）</span><span class="cmd-code" id="cmd-start">./dev.sh</span></span>
+        <button class="copy-btn" id="copy-cmd-start" onclick="copyCmd('cmd-start',event)">複製</button>
+      </div>
+    </li>
+    <li>
+      <div class="cmd-row" onclick="copyCmd('cmd-restart')">
+        <div class="cmd-icon">↺</div>
+        <span class="cmd-info"><span class="cmd-label">重啟全部</span><span class="cmd-code" id="cmd-restart">./dev.sh restart</span></span>
+        <button class="copy-btn" id="copy-cmd-restart" onclick="copyCmd('cmd-restart',event)">複製</button>
+      </div>
+    </li>
+    <li>
+      <div class="cmd-row" onclick="copyCmd('cmd-stop')">
+        <div class="cmd-icon">■</div>
+        <span class="cmd-info"><span class="cmd-label">停止 API / Web（MSSQL 容器保留）</span><span class="cmd-code" id="cmd-stop">./dev.sh stop</span></span>
+        <button class="copy-btn" id="copy-cmd-stop" onclick="copyCmd('cmd-stop',event)">複製</button>
+      </div>
+    </li>
+    <li>
+      <div class="cmd-row" onclick="copyCmd('cmd-log')">
+        <div class="cmd-icon">📋</div>
+        <span class="cmd-info"><span class="cmd-label">即時 log（API + Web + init-db）</span><span class="cmd-code" id="cmd-log">tail -f logs/*.log</span></span>
+        <button class="copy-btn" id="copy-cmd-log" onclick="copyCmd('cmd-log',event)">複製</button>
+      </div>
+    </li>
+    <li>
+      <div class="cmd-row" onclick="copyCmd('cmd-dev')">
+        <div class="cmd-icon">🧪</div>
+        <span class="cmd-info"><span class="cmd-label">Development 模式啟動 API（開 Swagger + CORS）</span><span class="cmd-code" id="cmd-dev">ASPNETCORE_ENVIRONMENT=Development ~/.dotnet/dotnet run \
+  --project api/src/TwseRevenue.Api</span></span>
+        <button class="copy-btn" id="copy-cmd-dev" onclick="copyCmd('cmd-dev',event)">複製</button>
+      </div>
+    </li>
+    <li>
+      <div class="cmd-row" onclick="copyCmd('cmd-test')">
+        <div class="cmd-icon">✅</div>
+        <span class="cmd-info"><span class="cmd-label">執行所有測試（net6 在 ~/.dotnet）</span><span class="cmd-code" id="cmd-test">~/.dotnet/dotnet test api/TwseRevenue.sln</span></span>
+        <button class="copy-btn" id="copy-cmd-test" onclick="copyCmd('cmd-test',event)">複製</button>
+      </div>
+    </li>
+    <li>
+      <div class="cmd-row" onclick="copyCmd('cmd-initdb')">
+        <div class="cmd-icon">🗄️</div>
+        <span class="cmd-info"><span class="cmd-label">重建資料庫（建表 + 預存程序）</span><span class="cmd-code" id="cmd-initdb">bash scripts/init-db.sh</span></span>
+        <button class="copy-btn" id="copy-cmd-initdb" onclick="copyCmd('cmd-initdb',event)">複製</button>
+      </div>
+    </li>
+  </ul>
+
+  <!-- ───── 資料庫 ───── -->
+  <p class="section-label">資料庫（MSSQL @ 1433）</p>
+  <ul>
+    <li>
+      <div class="cmd-row" onclick="copyCmd('db-query')">
+        <span class="badge db" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:10px">DB</span>
+        <span class="cmd-info"><span class="cmd-label">查最新 10 筆營收（密碼從 .env 讀，不寫死）</span><span class="cmd-code" id="db-query">source .env && docker exec twse-mssql /opt/mssql-tools18/bin/sqlcmd \
+  -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -C -d TwseRevenue \
+  -Q "SELECT TOP 10 * FROM dbo.MonthlyRevenue ORDER BY DataYearMonth DESC"</span></span>
+        <button class="copy-btn" id="copy-db-query" onclick="copyCmd('db-query',event)">複製</button>
+      </div>
+    </li>
+    <li>
+      <div class="cmd-row" onclick="copyCmd('db-shell')">
+        <span class="badge db" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:10px">⌨</span>
+        <span class="cmd-info"><span class="cmd-label">進互動式 sqlcmd（密碼從 .env 讀）</span><span class="cmd-code" id="db-shell">source .env && docker exec -it twse-mssql /opt/mssql-tools18/bin/sqlcmd \
+  -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -C -d TwseRevenue</span></span>
+        <button class="copy-btn" id="copy-db-shell" onclick="copyCmd('db-shell',event)">複製</button>
+      </div>
+    </li>
+  </ul>
+
+  <p class="foot">埠：Web 5173 · API 5080 · MSSQL 1433　|　資料夾入口：<code>twse-sites.html</code></p>
+
+  <script>
+    function go(url) { window.open(url, '_blank'); }
+    function copyCmd(id, e) {
+      if (e) e.stopPropagation();
+      const text = document.getElementById(id).textContent.trim();
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('copy-' + id);
+        if (btn) {
+          const prev = btn.textContent;
+          btn.textContent = '✓ 已複製';
+          btn.classList.add('copied');
+          setTimeout(() => { btn.textContent = prev; btn.classList.remove('copied'); }, 1800);
+        }
+      });
+    }
+  </script>
+</body>
+</html>

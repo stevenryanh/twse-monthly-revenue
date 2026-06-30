@@ -58,7 +58,8 @@ start_all() {
     fi
 
     echo "▶ 啟動 API（:${API_PORT}）…"
-    ( cd "$ROOT/api" && "$DOTNET_BIN" run --no-launch-profile --project src/TwseRevenue.Api ) \
+    # 本機開發固定 Development：開啟 Swagger 與前端跨來源（CORS）放行，前後端一鍵即通。
+    ( cd "$ROOT/api" && ASPNETCORE_ENVIRONMENT=Development "$DOTNET_BIN" run --no-launch-profile --project src/TwseRevenue.Api ) \
         > "$ROOT/logs/api.log" 2>&1 & echo "  API  PID $! → logs/api.log"
 
     echo "▶ 啟動 Web（:${WEB_PORT}）…"
