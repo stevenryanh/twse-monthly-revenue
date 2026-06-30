@@ -48,6 +48,8 @@ cp .env.example .env
 
 啟動後:前端 http://localhost:5173 ｜ Swagger http://localhost:5080/swagger 。
 
+> 💡 **開發站台**:用瀏覽器開專案根目錄的 [`twse-sites.html`](twse-sites.html)(`file://` 直接開,免啟服務),一頁集中所有服務連結、API 測試 curl(GET/POST)、常用指令與 DB 查詢——給第一次接觸這個專案的人快速上手。
+
 > **機密管理**(詳 [decisions/005](docs/decisions/005-secret-management.md)):連線字串/密碼一律不入庫。
 > - **單一來源** `.env`(git 忽略,範本見 `.env.example`):同時餵 docker compose、`init-db.sh`,並由 `./dev.sh` 組出 API 連線字串、以環境變數 `ConnectionStrings__TwseRevenue` 注入。
 > - **本機只需** `cp .env.example .env` 一次,之後 `./dev.sh` 全自動;不必每次手動設定機密。
