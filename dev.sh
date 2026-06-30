@@ -11,6 +11,16 @@ ROOT="$(cd "$(dirname "$0")" && pwd)"
 API_PORT=5080
 WEB_PORT=5173
 
+# global.json 釘選 .NET 6；若 PATH 上的 dotnet 沒有 net6 SDK，
+# 退而使用 ~/.dotnet（dotnet-install.sh 的標準安裝位置）。
+DOTNET_BIN="dotnet"
+if ! dotnet --list-sdks 2>/dev/null | grep -q '^6\.'; then
+    if [ -x "$HOME/.dotnet/dotnet" ] && "$HOME/.dotnet/dotnet" --list-sdks 2>/dev/null | grep -q '^6\.'; then
+        DOTNET_BIN="$HOME/.dotnet/dotnet"
+        export DOTNET_ROOT="$HOME/.dotnet"
+    fi
+fi
+
 stop_all() {
     echo "▶ 停止 API / Web…"
     for port in "$API_PORT" "$WEB_PORT"; do
@@ -47,11 +57,11 @@ start_all() {
         echo "  ✗ 初始化失敗，見 logs/init-db.log"; tail -n 15 "$ROOT/logs/init-db.log"; exit 1
     fi
 
-    echo "▶ 啟動 API（:$API_PORT）…"
-    ( cd "$ROOT/api" && dotnet run --no-launch-profile --project src/TwseRevenue.Api ) \
+    echo "▶ 啟動 API（:${API_PORT}）…"
+    ( cd "$ROOT/api" && "$DOTNET_BIN" run --no-launch-profile --project src/TwseRevenue.Api ) \
         > "$ROOT/logs/api.log" 2>&1 & echo "  API  PID $! → logs/api.log"
 
-    echo "▶ 啟動 Web（:$WEB_PORT）…"
+    echo "▶ 啟動 Web（:${WEB_PORT}）…"
     ( cd "$ROOT/web" && { [ -d node_modules ] || npm install; } && npm run dev ) \
         > "$ROOT/logs/web.log" 2>&1 & echo "  Web  PID $! → logs/web.log"
 

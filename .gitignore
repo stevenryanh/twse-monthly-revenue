@@ -9,6 +9,9 @@ node_modules/
 dist/
 *.local
 
+# 執行期日誌（dev.sh 產生）
+logs/
+
 # IDE
 .vs/
 .vscode/
