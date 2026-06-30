@@ -1,4 +1,6 @@
+using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Unicode;
 using TwseRevenue.Application.Errors;
 using TwseRevenue.Application.Logging;
 
@@ -11,6 +13,12 @@ namespace TwseRevenue.Api.Middleware;
 /// </summary>
 public sealed class ExceptionHandlingMiddleware
 {
+    // 讓中文等非 ASCII 字元以可讀 UTF-8 輸出（對齊 ContentType charset=utf-8），而非 \uXXXX 跳脫
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
+    };
+
     private readonly RequestDelegate _next;
     private readonly ILogger<ExceptionHandlingMiddleware> _logger;
 
@@ -55,6 +63,6 @@ public sealed class ExceptionHandlingMiddleware
         context.Response.Clear();
         context.Response.StatusCode = statusCode;
         context.Response.ContentType = "application/json; charset=utf-8";
-        await context.Response.WriteAsync(JsonSerializer.Serialize(body));
+        await context.Response.WriteAsync(JsonSerializer.Serialize(body, JsonOptions));
     }
 }
