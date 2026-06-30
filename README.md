@@ -2,6 +2,8 @@
 
 從政府資料開放平臺「上市公司每月營業收入彙總表」(臺灣證券交易所 OpenAPI `t187ap05_L`)取得資料,提供以**公司代號查詢**的前後端分離系統。
 
+> 👉 **第一次來?** 先看 [**面試導覽 — 5 分鐘進入狀況**](docs/ONBOARDING.md):一行啟動 + 系統全貌 + 設計亮點。
+
 ## 架構
 
 前後端分離,每層職責單一:
@@ -9,7 +11,7 @@
 ```
 db/    MSSQL：資料表 + 預存程序（手寫 schema，非 Code-First）
 api/   .NET 6 Web API，Clean Architecture 四層
-web/   Vue 3 (Vite) 前端    ← 開發中
+web/   Vue 3 (Vite) 前端：代號查詢 + 表格 + ECharts 趨勢圖
 ```
 
 API 內部四層(對齊團隊既有微服務慣例):
@@ -27,25 +29,33 @@ API 內部四層(對齊團隊既有微服務慣例):
 |---|---|
 | DB | MSSQL 2022 (Docker)、預存程序 |
 | API | .NET 6、MediatR、ADO.NET (`Microsoft.Data.SqlClient`)、Serilog、Swagger、xUnit + Moq |
-| Web | Vue 3 + Vite |
+| Web | Vue 3 + Vite、ECharts（按需匯入）、原生 `fetch` |
 
 ## 啟動
 
-前置:Docker、.NET 6 SDK。
+前置:Docker、.NET 6 SDK、Node。
 
 ```bash
-# 1. 啟動資料庫
-docker compose up -d mssql
+# 1. 設定密碼（不入庫，單一來源）：複製範本後填入強密碼
+cp .env.example .env
 
-# 2. 初始化資料表與預存程序
-bash scripts/init-db.sh
+# 2. 一鍵啟動 DB + API + Web（會自動建表、注入連線字串、印出各網址）
+./dev.sh
+#    停止：./dev.sh stop ｜ 重啟：./dev.sh restart
 
-# 3. 啟動 API（http://localhost:5080，Swagger 於 /swagger）
-cd api && dotnet run --no-launch-profile --project src/TwseRevenue.Api
-
-# 4. 執行測試
-cd api && dotnet test
+# 測試：cd api && dotnet test
 ```
+
+啟動後:前端 http://localhost:5173 ｜ Swagger http://localhost:5080/swagger 。
+
+> **機密管理**(詳 [decisions/005](docs/decisions/005-secret-management.md)):連線字串/密碼一律不入庫。
+> - **單一來源** `.env`(git 忽略,範本見 `.env.example`):同時餵 docker compose、`init-db.sh`,並由 `./dev.sh` 組出 API 連線字串、以環境變數 `ConnectionStrings__TwseRevenue` 注入。
+> - **本機只需** `cp .env.example .env` 一次,之後 `./dev.sh` 全自動;不必每次手動設定機密。
+> - **SIT/UAT/PROD**:由 CI/CD 或 Secret Manager 注入同名環境變數,開發者不接觸高階環境密碼。
+> - 不走 `dev.sh` 而想直接 `dotnet run` 時,可改用 `dotnet user-secrets` 設定 `ConnectionStrings:TwseRevenue`。
+>
+> 前端預設打 `http://localhost:5080`，可複製 `web/.env.example` 為 `web/.env` 後以 `VITE_API_BASE` 覆寫。
+> 開發環境的 API 已放行 `http://localhost:5173` 的 CORS（來源清單見 `api/.../appsettings.json` 的 `Cors:AllowedOrigins`）。
 
 ## API
 
@@ -59,6 +69,7 @@ cd api && dotnet test
 - 資料存取只走**參數化預存程序**,從資料層杜絕 SQL Injection。
 - `Directory.Build.props` 將 `CA2100`(SQL 注入)升為**編譯錯誤**,作為靜態第二道防線。
 - 全域 `ExceptionFilter` 統一錯誤處理:驗證錯誤 → 400,其餘 → 500 且不外洩內部細節、完整記錄 Log。
+- **機密不入庫**:連線字串/密碼走 `.env`(已忽略)與 .NET User Secrets / 環境變數;repo 內無任何明文憑證。
 
 ## 設計決策
 
