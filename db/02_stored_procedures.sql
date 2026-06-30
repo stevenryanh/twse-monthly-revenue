@@ -85,7 +85,8 @@ GO
    keyword 可為「代號的一部分」或「名稱的一部分」（皆為包含比對）；
    每間公司取最新月一筆，最多 20 筆。
    全程參數化；另把 LIKE 萬用字元（% _ [）轉義，避免使用者輸入改變比對語意。
-   排序：代號前綴 > 名稱前綴 > 其他包含，方便「打代號／打公司名開頭」時精準浮現。 */
+   排序：代號完全命中 > 代號前綴 > 名稱前綴 > 代號包含 > 名稱包含，
+   讓「打完整代號（2330）」精準浮在最前，「打代號片段／公司名」也都列得出。 */
 IF OBJECT_ID(N'dbo.usp_Company_Search', N'P') IS NOT NULL
     DROP PROCEDURE dbo.usp_Company_Search;
 GO
@@ -109,9 +110,11 @@ BEGIN
     WHERE  rn = 1
       AND  (CompanyCode LIKE N'%' + @kw + N'%' OR CompanyName LIKE N'%' + @kw + N'%')
     ORDER BY
-        CASE WHEN CompanyCode LIKE @kw + N'%' THEN 0   -- 代號前綴最優先（打 2330）
-             WHEN CompanyName LIKE @kw + N'%' THEN 1   -- 名稱前綴次之（打「台積」）
-             ELSE 2 END,                               -- 其餘包含命中（打 33、打「積」）
+        CASE WHEN CompanyCode = @Keyword              THEN 0   -- 代號完全命中（打 2330）最優先
+             WHEN CompanyCode LIKE @kw + N'%'         THEN 1   -- 代號前綴（打 23）
+             WHEN CompanyName LIKE @kw + N'%'         THEN 2   -- 名稱前綴（打「台積」）
+             WHEN CompanyCode LIKE N'%' + @kw + N'%'  THEN 3   -- 代號包含（打 33 → 2330）
+             ELSE 4 END,                                       -- 名稱包含（打「積」）
         CompanyCode;
 END
 GO
