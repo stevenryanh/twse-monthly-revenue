@@ -167,10 +167,11 @@ IF OBJECT_ID(N'dbo.usp_Quote_Ranking', N'P') IS NOT NULL
     DROP PROCEDURE dbo.usp_Quote_Ranking;
 GO
 CREATE PROCEDURE dbo.usp_Quote_Ranking
-    @Keyword NVARCHAR(100) = NULL,
-    @Codes   NVARCHAR(MAX) = NULL,   -- 逗號分隔代碼清單；NULL/空 = 不限
-    @Sort    NVARCHAR(20)  = NULL,   -- return | volatility | avg | daily；NULL = return
-    @Top     INT           = 30
+    @Keyword  NVARCHAR(100) = NULL,
+    @Codes    NVARCHAR(MAX) = NULL,   -- 逗號分隔代碼清單；NULL/空 = 不限
+    @Sort     NVARCHAR(20)  = NULL,   -- return | volatility | avg | daily；NULL = return
+    @Top      INT           = 30,
+    @MaxPrice DECIMAL(18,4) = NULL    -- 小資可負擔：最近收盤每股價上限；NULL = 不限
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -212,6 +213,7 @@ BEGIN
     FROM   agg
     WHERE  (@hasKw = 0 OR CompanyCode LIKE N'%' + @kw + N'%' OR CompanyName LIKE N'%' + @kw + N'%')
       AND  (@hasCodes = 0 OR CompanyCode IN (SELECT LTRIM(RTRIM(value)) FROM STRING_SPLIT(@Codes, N',')))
+      AND  (@MaxPrice IS NULL OR LastClose <= @MaxPrice)   -- 小資可負擔：濾掉每股價超過上限者
     ORDER BY
         CASE @Sort
             WHEN 'volatility' THEN VolatilityPct

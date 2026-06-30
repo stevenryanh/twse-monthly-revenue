@@ -38,7 +38,7 @@ public sealed class QuoteRepository : IQuoteRepository
     }
 
     public async Task<IReadOnlyList<QuoteRanking>> RankAsync(
-        string? keyword, string? codes, string? sort, int top, CancellationToken ct)
+        string? keyword, string? codes, string? sort, int top, decimal? maxPrice, CancellationToken ct)
     {
         await using var conn = _factory.Create();
         await using var cmd = new SqlCommand("dbo.usp_Quote_Ranking", conn)
@@ -49,6 +49,7 @@ public sealed class QuoteRepository : IQuoteRepository
         cmd.Parameters.Add(new SqlParameter("@Codes", SqlDbType.NVarChar, -1) { Value = (object?)codes ?? DBNull.Value });
         cmd.Parameters.Add(new SqlParameter("@Sort", SqlDbType.NVarChar, 20) { Value = (object?)sort ?? DBNull.Value });
         cmd.Parameters.Add(new SqlParameter("@Top", SqlDbType.Int) { Value = top });
+        cmd.Parameters.Add(new SqlParameter("@MaxPrice", SqlDbType.Decimal) { Precision = 18, Scale = 4, Value = (object?)maxPrice ?? DBNull.Value });
 
         await conn.OpenAsync(ct);
         var list = new List<QuoteRanking>();

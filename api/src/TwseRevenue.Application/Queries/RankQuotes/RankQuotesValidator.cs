@@ -15,5 +15,7 @@ public sealed class RankQuotesValidator : IValidator<RankQuotesQuery>
             throw new ValidationException("排序方式不正確（可用：return、volatility、avg、daily）。");
         if (!string.IsNullOrEmpty(query.Keyword) && query.Keyword.Length > 100)
             throw new ValidationException("搜尋關鍵字長度不可超過 100。");
+        if (query.MaxPrice is < 0)
+            throw new ValidationException("可負擔每股價上限不可為負。");
     }
 }

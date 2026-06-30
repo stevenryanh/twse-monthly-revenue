@@ -14,5 +14,6 @@ public interface IQuoteRepository
     /// 買賣投報排行：以近期間每日行情彙總每檔報酬指標並排序。
     /// keyword（代號/名稱包含）、codes（逗號分隔代碼清單）皆可選；sort 指排序指標。
     /// </summary>
-    Task<IReadOnlyList<QuoteRanking>> RankAsync(string? keyword, string? codes, string? sort, int top, CancellationToken ct);
+    Task<IReadOnlyList<QuoteRanking>> RankAsync(
+        string? keyword, string? codes, string? sort, int top, decimal? maxPrice, CancellationToken ct);
 }

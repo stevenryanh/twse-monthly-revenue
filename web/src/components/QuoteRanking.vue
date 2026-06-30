@@ -10,8 +10,20 @@ const SORTS = [
   { key: 'daily', label: '最近一日報酬' },
 ]
 
+// 小資總預算：以「買得起一張(1000股)」為準 → 每股價上限 = 總預算 ÷ 1000。
+// 例：總預算 5 萬 → 每股 ≤ 50，正是金融股、台泥、中鋼等小資可負擔的範圍。
+const BUDGETS = [
+  { label: '不限', value: null },
+  { label: '1 萬', value: 10000 },
+  { label: '3 萬', value: 30000 },
+  { label: '5 萬', value: 50000 },
+  { label: '10 萬', value: 100000 },
+  { label: '30 萬', value: 300000 },
+]
+
 const sort = ref('return')
 const keyword = ref('')
+const budget = ref(null)
 const rows = ref([])
 const loading = ref(false)
 const error = ref('')
@@ -35,6 +47,11 @@ function price(v) {
   return v == null ? '—' : Number(v).toLocaleString('zh-TW', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
+// 最近每張成本（每股×1000）以「萬」呈現，小資可負擔一目了然
+function lotCost(v) {
+  return v == null ? '—' : (Number(v) * 1000 / 10000).toFixed(1) + ' 萬'
+}
+
 async function load() {
   inFlight?.abort()
   const controller = new AbortController()
@@ -42,7 +59,8 @@ async function load() {
   loading.value = true
   error.value = ''
   try {
-    rows.value = await rankQuotes({ q: keyword.value, sort: sort.value, top: 30 }, controller.signal)
+    const maxPrice = budget.value ? budget.value / 1000 : null // 總預算 → 買得起一張的每股價上限
+    rows.value = await rankQuotes({ q: keyword.value, sort: sort.value, top: 30, maxPrice }, controller.signal)
   } catch (e) {
     if (e.name === 'AbortError') return
     error.value = e.message || '排行查詢失敗'
@@ -53,6 +71,7 @@ async function load() {
 }
 
 watch(sort, load)
+watch(budget, load)
 watch(keyword, () => {
   if (kwTimer) clearTimeout(kwTimer)
   kwTimer = setTimeout(load, 300)
@@ -64,7 +83,8 @@ onMounted(load)
   <div class="card">
     <h1 style="font-size: 1.2rem; margin-bottom: 4px">買賣投報排行</h1>
     <p class="subtitle" style="margin: 0 0 14px">
-      以「每元當日報酬＝漲跌 ÷ 昨收」為基礎，近一個月每日行情彙總；資料範圍：0050 與成分股。
+      以「每元當日報酬＝漲跌 ÷ 昨收」為基礎，近一個月每日行情彙總；資料範圍：0050 與成分股。<br>
+      「小資總預算」以買得起一張（1000 股）為準，篩出小資也買得起的範圍。
     </p>
 
     <div class="rank-controls">
@@ -72,6 +92,12 @@ onMounted(load)
         排序依據
         <select v-model="sort">
           <option v-for="s in SORTS" :key="s.key" :value="s.key">{{ s.label }}</option>
+        </select>
+      </label>
+      <label>
+        小資總預算
+        <select v-model="budget">
+          <option v-for="b in BUDGETS" :key="b.label" :value="b.value">{{ b.label }}</option>
         </select>
       </label>
       <input v-model="keyword" type="text" placeholder="篩選代號或名稱（可空）" autocomplete="off" />
@@ -93,6 +119,7 @@ onMounted(load)
             <th>平均日報酬</th>
             <th>最近一日</th>
             <th>期初→期末收盤</th>
+            <th>最近每張成本</th>
             <th>天數</th>
           </tr>
         </thead>
@@ -106,6 +133,7 @@ onMounted(load)
             <td :class="pctClass(r.avgDailyReturnPercent)">{{ formatPercent(r.avgDailyReturnPercent) }}</td>
             <td :class="pctClass(r.lastDayReturnPercent)">{{ formatPercent(r.lastDayReturnPercent) }}</td>
             <td>{{ price(r.firstClose) }} → {{ price(r.lastClose) }}</td>
+            <td>{{ lotCost(r.lastClose) }}</td>
             <td>{{ r.days }}</td>
           </tr>
         </tbody>

@@ -26,7 +26,8 @@ public sealed class QuotesController : ControllerBase
 
     /// <summary>
     /// 買賣投報排行：把（條件中的）股票依每元當日報酬在近期間的指標排序。
-    /// q=代號/名稱片段；codes=逗號分隔代碼清單；sort=return|volatility|avg|daily；top=筆數上限。
+    /// q=代號/名稱片段；codes=逗號分隔代碼清單；sort=return|volatility|avg|daily；top=筆數上限；
+    /// maxPrice=小資可負擔的每股價上限（最近收盤）。
     /// </summary>
     [HttpGet("ranking")]
     [ProducesResponseType(typeof(IReadOnlyList<QuoteRankingDto>), StatusCodes.Status200OK)]
@@ -35,6 +36,7 @@ public sealed class QuotesController : ControllerBase
         [FromQuery] string? codes,
         [FromQuery] string? sort,
         [FromQuery] int top,
+        [FromQuery] decimal? maxPrice,
         CancellationToken ct)
-        => Ok(await _mediator.Send(new RankQuotesQuery(q, codes, sort, top), ct));
+        => Ok(await _mediator.Send(new RankQuotesQuery(q, codes, sort, top, maxPrice), ct));
 }

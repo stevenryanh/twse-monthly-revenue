@@ -28,7 +28,7 @@ public sealed class RankQuotesHandler
     {
         var top = request.Top <= 0 ? DefaultTop : Math.Min(request.Top, MaxTop);
         var rows = await _repository.RankAsync(
-            request.Keyword, request.Codes, request.Sort, top, cancellationToken);
+            request.Keyword, request.Codes, request.Sort, top, request.MaxPrice, cancellationToken);
 
         _logger.LogInformation(TwseLogCodes.Quote.Ranked +
             " 買賣投報排行完成 - Sort={Sort}, Keyword={Keyword}, Count={Count}",
