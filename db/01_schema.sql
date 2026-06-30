@@ -45,3 +45,30 @@ CREATE NONCLUSTERED INDEX IX_MonthlyRevenue_YearMonth
     ON dbo.MonthlyRevenue (DataYearMonth)
     INCLUDE (CompanyName, Industry, CurrentMonthRevenue);
 GO
+
+/* ============================================================
+   每日收盤行情（買賣股票投報用）
+   來源：證交所 STOCK_DAY_ALL（當日全市場）/ STOCK_DAY（單檔月歷史）。
+   用途：以「每元當日報酬（漲跌÷昨收）」在近期間（一個月）衡量買賣投報與其變量。
+   主鍵 (代號 + 交易日)：一檔每日恰一筆；交易日以民國 YYYMMDD 整數保真儲存。
+   ============================================================ */
+IF OBJECT_ID(N'dbo.DailyQuote', N'U') IS NOT NULL
+    DROP TABLE dbo.DailyQuote;
+GO
+
+CREATE TABLE dbo.DailyQuote
+(
+    CompanyCode  NVARCHAR(10)   NOT NULL,  -- 證券代號
+    TradeDate    INT            NOT NULL,  -- 交易日（民國 YYYMMDD，例 1150629）
+    CompanyName  NVARCHAR(60)   NULL,      -- 證券名稱（行情來源附帶）
+    OpenPrice    DECIMAL(18,4)  NULL,      -- 開盤價
+    HighPrice    DECIMAL(18,4)  NULL,      -- 最高價
+    LowPrice     DECIMAL(18,4)  NULL,      -- 最低價
+    ClosePrice   DECIMAL(18,4)  NULL,      -- 收盤價
+    Change       DECIMAL(18,4)  NULL,      -- 漲跌價差（相對昨收，帶正負）
+    TradeVolume  BIGINT         NULL,      -- 成交股數
+    CreatedAt    DATETIME2(0)   NOT NULL CONSTRAINT DF_DailyQuote_CreatedAt DEFAULT (SYSUTCDATETIME()),
+    UpdatedAt    DATETIME2(0)   NOT NULL CONSTRAINT DF_DailyQuote_UpdatedAt DEFAULT (SYSUTCDATETIME()),
+    CONSTRAINT PK_DailyQuote PRIMARY KEY CLUSTERED (CompanyCode, TradeDate)
+);
+GO

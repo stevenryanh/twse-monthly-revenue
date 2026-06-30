@@ -4,6 +4,9 @@ import { getRevenuesByCompanyCode } from './api/revenues'
 import { searchCompanies } from './api/companies'
 import RevenueTable from './components/RevenueTable.vue'
 import RevenueChart from './components/RevenueChart.vue'
+import QuoteRanking from './components/QuoteRanking.vue'
+
+const tab = ref('revenue') // 'revenue' = 個股營收查詢；'ranking' = 買賣投報排行
 
 const code = ref('')
 const rows = ref([])
@@ -91,8 +94,18 @@ async function search() {
 
 <template>
   <h1>上市公司每月營收查詢</h1>
-  <p class="subtitle">資料來源：臺灣證券交易所 OpenAPI（t187ap05_L）</p>
+  <p class="subtitle">資料來源：臺灣證券交易所 OpenAPI（t187ap05_L 月營收 · STOCK_DAY 每日行情）</p>
 
+  <div class="tabs">
+    <button :class="{ active: tab === 'revenue' }" @click="tab = 'revenue'">個股營收查詢</button>
+    <button :class="{ active: tab === 'ranking' }" @click="tab = 'ranking'">買賣投報排行</button>
+  </div>
+
+  <template v-if="tab === 'ranking'">
+    <QuoteRanking />
+  </template>
+
+  <template v-else>
   <div class="card">
     <div class="search-bar">
       <div class="typeahead">
@@ -148,9 +161,30 @@ async function search() {
       <RevenueTable :rows="rows" />
     </div>
   </template>
+  </template>
 </template>
 
 <style scoped>
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.tabs button {
+  padding: 8px 18px;
+  font-size: 0.95rem;
+  border: 1px solid var(--border, #ddd);
+  background: #fff;
+  color: #555;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.tabs button.active {
+  background: var(--primary, #1b5e20);
+  border-color: var(--primary, #1b5e20);
+  color: #fff;
+  font-weight: 600;
+}
 .typeahead {
   position: relative;
   flex: 1;

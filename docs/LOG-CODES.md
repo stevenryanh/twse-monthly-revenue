@@ -17,6 +17,8 @@
 | `I301` | Info | `Upserted` | 營收資料寫入（upsert）成功，含 CompanyCode/DataYearMonth |
 | `I302` | Info | `Queried` | 營收查詢完成，含 CompanyCode/回傳筆數 Count |
 | `I303` | Info | `CompaniesSearched` | 公司關鍵字搜尋完成，含 Keyword/回傳筆數 Count |
+| `I304` | Info | `Upserted` | 每日行情寫入（upsert）成功，含 CompanyCode/TradeDate |
+| `I305` | Info | `Ranked` | 買賣投報排行完成，含 Sort/Keyword/回傳筆數 Count |
 
 ## CrossCutting（layer 6）
 

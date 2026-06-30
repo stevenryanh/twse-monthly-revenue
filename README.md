@@ -48,6 +48,9 @@ python3 scripts/import-twse.py            # 全部上市公司
 python3 scripts/import-twse.py 2330 1101  # 只匯指定代碼
 python3 scripts/import-twse.py 0050       # 0050 自動展開為台灣50成分股
 
+# 3b.（買賣投報排行用）匯入一個月每日股價（STOCK_DAY）
+python3 scripts/import-quotes.py          # 預設 0050（ETF）+ 成分股，當月每日
+
 # 測試：cd api && dotnet test
 ```
 

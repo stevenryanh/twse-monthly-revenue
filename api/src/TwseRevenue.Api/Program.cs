@@ -3,7 +3,9 @@ using TwseRevenue.Api.Middleware;
 using TwseRevenue.Application.Abstractions;
 using TwseRevenue.Application.Behaviors;
 using TwseRevenue.Application.Commands.CreateRevenue;
+using TwseRevenue.Application.Commands.CreateQuote;
 using TwseRevenue.Application.Queries.GetRevenueByCompanyCode;
+using TwseRevenue.Application.Queries.RankQuotes;
 using TwseRevenue.Application.Queries.SearchCompanies;
 using TwseRevenue.Application.Mapping;
 using MediatR;
@@ -43,6 +45,8 @@ builder.Services.AddMediatR(cfg =>
 builder.Services.AddScoped<IValidator<CreateRevenueCommand>, CreateRevenueValidator>();
 builder.Services.AddScoped<IValidator<GetRevenueByCompanyCodeQuery>, GetRevenueByCompanyCodeValidator>();
 builder.Services.AddScoped<IValidator<SearchCompaniesQuery>, SearchCompaniesValidator>();
+builder.Services.AddScoped<IValidator<CreateQuoteCommand>, CreateQuoteValidator>();
+builder.Services.AddScoped<IValidator<RankQuotesQuery>, RankQuotesValidator>();
 
 // 資料存取。連線字串不入庫：本機開發由 ./dev.sh 從 .env 注入環境變數
 // ConnectionStrings__TwseRevenue；SIT/UAT/PROD 由 CI/CD 或 Secret Manager 注入同名變數。
@@ -53,6 +57,7 @@ var connectionString = builder.Configuration.GetConnectionString("TwseRevenue")
         "  其他環境：以環境變數 ConnectionStrings__TwseRevenue 注入。");
 builder.Services.AddSingleton<ISqlConnectionFactory>(new SqlConnectionFactory(connectionString));
 builder.Services.AddScoped<IRevenueRepository, RevenueRepository>();
+builder.Services.AddScoped<IQuoteRepository, QuoteRepository>();
 
 var app = builder.Build();
 

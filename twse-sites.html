@@ -55,7 +55,7 @@
     <div class="hero-title">🍚 懶人一鍵：啟動服務 + 餵資料</div>
     <div class="hero-sub">DB 是空的查不到東西？複製下面這行貼到終端機，啟動全部服務並從 TWSE 灌入營收資料。<br>只想灌某幾檔？在指令後面接代碼，例如 <code style="background:rgba(0,0,0,.25);color:#e8f5e9;padding:1px 5px;border-radius:3px">python3 scripts/import-twse.py 2330 1101</code>。</div>
     <div class="hero-cmd" onclick="copyCmd('cmd-allinone')">
-      <span class="hero-code" id="cmd-allinone">./dev.sh && python3 scripts/import-twse.py</span>
+      <span class="hero-code" id="cmd-allinone">./dev.sh && python3 scripts/import-twse.py && python3 scripts/import-quotes.py</span>
       <button class="hero-copy" id="copy-cmd-allinone" onclick="copyCmd('cmd-allinone',event)">複製</button>
     </div>
   </div>
@@ -183,6 +183,13 @@
         <div class="cmd-icon">📥</div>
         <span class="cmd-info"><span class="cmd-label">匯入 TWSE 營收資料（t187ap05_L，可重跑）</span><span class="cmd-code" id="cmd-import">python3 scripts/import-twse.py</span></span>
         <button class="copy-btn" id="copy-cmd-import" onclick="copyCmd('cmd-import',event)">複製</button>
+      </div>
+    </li>
+    <li>
+      <div class="cmd-row" onclick="copyCmd('cmd-import-q')">
+        <div class="cmd-icon">📈</div>
+        <span class="cmd-info"><span class="cmd-label">匯入每日股價（STOCK_DAY，買賣投報排行用）</span><span class="cmd-code" id="cmd-import-q">python3 scripts/import-quotes.py</span></span>
+        <button class="copy-btn" id="copy-cmd-import-q" onclick="copyCmd('cmd-import-q',event)">複製</button>
       </div>
     </li>
     <li>

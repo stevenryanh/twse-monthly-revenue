@@ -23,4 +23,11 @@ public static class TwseLogCodes
         public const string Queried           = "I302"; // 營收查詢完成，含 CompanyCode/回傳筆數 Count
         public const string CompaniesSearched = "I303"; // 公司關鍵字搜尋完成，含 Keyword/回傳筆數 Count
     }
+
+    /// <summary>Application（layer 3）— 買賣投報（每日行情）用例。</summary>
+    public static class Quote
+    {
+        public const string Upserted = "I304"; // 每日行情寫入（upsert）成功，含 CompanyCode/TradeDate
+        public const string Ranked   = "I305"; // 買賣投報排行完成，含 Sort/Keyword/回傳筆數 Count
+    }
 }
