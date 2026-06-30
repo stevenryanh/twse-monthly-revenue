@@ -41,6 +41,17 @@
     .hero-code { flex: 1; color: #e8f5e9; font-family: monospace; font-size: .78rem; word-break: break-all; }
     .hero-copy { background: #fff; border: none; border-radius: 6px; padding: 6px 14px; cursor: pointer; color: #1b5e20; font-weight: 600; font-size: .78rem; flex-shrink: 0; }
     .hero-copy.copied { background: #a5d6a7; color: #1b3d1c; }
+    .share-box { background: #fff; border-radius: 12px; padding: 14px 16px; margin-bottom: 18px; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+    .share-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .share-url { flex: 1; min-width: 180px; font-family: monospace; font-size: .9rem; color: #1565c0; background: #f3f6fb; padding: 8px 12px; border-radius: 8px; }
+    .share-line { background: #06c755; color: #fff; border: none; border-radius: 8px; padding: 9px 16px; font-weight: 600; font-size: .85rem; cursor: pointer; }
+    .share-line:hover { background: #05b34c; }
+    .share-native { background: #fff; border: 1px solid #ccc; border-radius: 8px; padding: 9px 14px; font-size: .85rem; cursor: pointer; }
+    .share-native:hover { border-color: #888; }
+    .share-copy { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 9px 14px; font-size: .85rem; cursor: pointer; color: #666; }
+    .share-copy:hover { background: #e8f5e9; border-color: #81c784; color: #2e7d32; }
+    .share-note { font-size: .76rem; color: #888; line-height: 1.7; margin: 10px 0 0; }
+    .share-note code { background: #f3f4f6; padding: 1px 5px; border-radius: 3px; }
     .note { font-size: .76rem; color: #888; background: #fff; border-radius: 10px; padding: 10px 14px; box-shadow: 0 1px 3px rgba(0,0,0,.1); margin-bottom: 10px; line-height: 1.6; }
     .note code { background: #f3f4f6; padding: 1px 5px; border-radius: 3px; font-size: .72rem; }
     .foot { color: #aaa; font-size: .72rem; text-align: center; margin: 26px 0 10px; }
@@ -58,6 +69,22 @@
       <span class="hero-code" id="cmd-allinone">./dev.sh && python3 scripts/import-twse.py && python3 scripts/import-quotes.py</span>
       <button class="hero-copy" id="copy-cmd-allinone" onclick="copyCmd('cmd-allinone',event)">複製</button>
     </div>
+  </div>
+
+  <!-- ───── 分享給好友（Tailscale + LINE）───── -->
+  <p class="section-label">分享給好友</p>
+  <div class="share-box">
+    <div class="share-row">
+      <span class="share-url" id="share-url">http://100.97.0.34:5173</span>
+      <button class="share-line" onclick="shareLine()">📱 分享到 LINE</button>
+      <button class="share-native" onclick="shareNative()">📤 分享…</button>
+      <button class="share-copy" id="share-copy" onclick="copyShare(event)">複製</button>
+    </div>
+    <p class="share-note">
+      這是你的 <strong>Tailscale 內網連結</strong>。對方要看得到，需：① 手機裝 Tailscale、登入<strong>自己的帳號</strong>
+      ② 你在 <a href="https://login.tailscale.com/admin/machines" target="_blank">Tailscale 後台</a>把本機 <code>Share</code> 給他
+      ③ 你的 Mac 醒著、服務在跑（<code>./dev.sh</code>）。<strong>只開放 tailnet 內的人，不公開到網路。</strong>
+    </p>
   </div>
 
   <!-- ───── 服務連結 ───── -->
@@ -270,6 +297,27 @@
 
   <script>
     function go(url) { window.open(url, '_blank'); }
+
+    // ── 分享給好友 ──
+    var SHARE_URL = document.getElementById('share-url') ? document.getElementById('share-url').textContent.trim() : '';
+    function shareLine() {
+      window.open('https://social-plugins.line.me/lineit/share?url=' + encodeURIComponent(SHARE_URL), '_blank');
+    }
+    function shareNative() {
+      if (navigator.share) {
+        navigator.share({ title: 'TWSE 買賣投報排行', text: '一起看每月營收與買賣投報排行', url: SHARE_URL })
+          .catch(function () {});
+      } else {
+        shareLine(); // 桌機沒有原生分享就退回 LINE
+      }
+    }
+    function copyShare(e) {
+      navigator.clipboard.writeText(SHARE_URL).then(function () {
+        var b = document.getElementById('share-copy');
+        b.textContent = '✓ 已複製';
+        setTimeout(function () { b.textContent = '複製'; }, 1800);
+      });
+    }
     function copyCmd(id, e) {
       if (e) e.stopPropagation();
       const text = document.getElementById(id).textContent.trim();
