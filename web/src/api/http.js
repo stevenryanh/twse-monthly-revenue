@@ -2,7 +2,9 @@
 // 採洋蔥式 middleware 鏈：每個 middleware 收 (ctx, next)，可在 fetch 前後加工。
 // 未來要加 auth token、重試、前端 log 等，只要往 middlewares 陣列插一個，呼叫端不動。
 
-const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:5080'
+// 預設走同源 ''（→ /api，由 Vite 代理到後端 5080）：本機與 Tailscale 分享皆免 CORS、單一網址即可。
+// 要直連跨來源後端時，設 VITE_API_BASE=http://localhost:5080 覆寫。
+const API_BASE = import.meta.env.VITE_API_BASE ?? ''
 const CORRELATION_HEADER = 'X-Correlation-ID'
 
 /** 標準化的 API 錯誤，攜帶 HTTP 狀態與後端回傳的 traceId（便於回報/對日誌）。 */
