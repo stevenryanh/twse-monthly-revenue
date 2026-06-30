@@ -49,6 +49,9 @@ api_ok || { echo "✗ API 未就緒，略過本次"; [ "$STARTED_API" = 1 ] && k
 echo "▶ 匯入營收…"; python3 scripts/import-twse.py
 echo "▶ 匯入股價…"; MONTHS="${MONTHS:-1}" python3 scripts/import-quotes.py
 
+# 3b) 抓完即產生當日觀察名單（趁 API 還在）
+echo "▶ 產生觀察名單…"; python3 scripts/gen-watchlist.py || echo "  （觀察名單產生失敗，略過）"
+
 # 4) 若 API 由本腳本啟動，收掉（不打擾你手動開的服務）
 [ "$STARTED_API" = 1 ] && { echo "收掉自動啟動的 API"; kill "$API_PID" 2>/dev/null; }
 echo "===== $(date '+%F %T') 完成 ====="

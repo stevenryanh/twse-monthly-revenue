@@ -12,6 +12,9 @@ dist/
 # 執行期日誌（dev.sh 產生）
 logs/
 
+# 每日自動產生的觀察名單
+watchlist.md
+
 # IDE
 .vs/
 .vscode/
