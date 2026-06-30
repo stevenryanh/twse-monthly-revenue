@@ -101,6 +101,45 @@ public sealed class QuoteRepository : IQuoteRepository
         return list;
     }
 
+    public async Task<IReadOnlyDictionary<string, IReadOnlyList<DailyQuote>>> GetSeriesForCodesAsync(
+        IReadOnlyCollection<string> codes, CancellationToken ct)
+    {
+        var result = new Dictionary<string, IReadOnlyList<DailyQuote>>();
+        if (codes.Count == 0) return result;
+
+        await using var conn = _factory.Create();
+        await using var cmd = new SqlCommand("dbo.usp_DailyQuote_GetSeriesForCodes", conn)
+        {
+            CommandType = CommandType.StoredProcedure,
+        };
+        cmd.Parameters.Add(new SqlParameter("@Codes", SqlDbType.NVarChar, -1) { Value = string.Join(",", codes) });
+
+        await conn.OpenAsync(ct);
+        await using var reader = await cmd.ExecuteReaderAsync(ct);
+        while (await reader.ReadAsync(ct))
+        {
+            var code = reader.GetString(reader.GetOrdinal("CompanyCode"));
+            if (!result.TryGetValue(code, out var list))
+            {
+                list = new List<DailyQuote>();
+                result[code] = list;
+            }
+            ((List<DailyQuote>)list).Add(new DailyQuote
+            {
+                CompanyCode = code,
+                TradeDate = reader.GetInt32(reader.GetOrdinal("TradeDate")),
+                CompanyName = NullableString(reader, "CompanyName"),
+                OpenPrice = NullableDecimal(reader, "OpenPrice"),
+                HighPrice = NullableDecimal(reader, "HighPrice"),
+                LowPrice = NullableDecimal(reader, "LowPrice"),
+                ClosePrice = NullableDecimal(reader, "ClosePrice"),
+                Change = NullableDecimal(reader, "Change"),
+                TradeVolume = reader.IsDBNull(reader.GetOrdinal("TradeVolume")) ? null : reader.GetInt64(reader.GetOrdinal("TradeVolume")),
+            });
+        }
+        return result;
+    }
+
     private static string? NullableString(SqlDataReader r, string col)
     {
         var i = r.GetOrdinal(col);

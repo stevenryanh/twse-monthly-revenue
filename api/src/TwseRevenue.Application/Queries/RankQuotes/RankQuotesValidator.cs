@@ -7,7 +7,7 @@ namespace TwseRevenue.Application.Queries.RankQuotes;
 public sealed class RankQuotesValidator : IValidator<RankQuotesQuery>
 {
     private static readonly HashSet<string> AllowedSorts =
-        new(StringComparer.OrdinalIgnoreCase) { "return", "volatility", "avg", "daily", "sharpe" };
+        new(StringComparer.OrdinalIgnoreCase) { "return", "volatility", "avg", "daily", "sharpe", "swingscore" };
 
     public void Validate(RankQuotesQuery query)
     {

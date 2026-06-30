@@ -257,3 +257,24 @@ BEGIN
     ORDER BY TradeDate ASC;                -- 由舊到新，供序列分析
 END
 GO
+
+/* -------- 批次取多檔每日序列：供「易入手波段分」逐檔算波段週期 --------
+   @Codes 逗號分隔；NULL/空 = 全部。全程參數化。 */
+IF OBJECT_ID(N'dbo.usp_DailyQuote_GetSeriesForCodes', N'P') IS NOT NULL
+    DROP PROCEDURE dbo.usp_DailyQuote_GetSeriesForCodes;
+GO
+CREATE PROCEDURE dbo.usp_DailyQuote_GetSeriesForCodes
+    @Codes NVARCHAR(MAX) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    DECLARE @hasCodes BIT = CASE WHEN LTRIM(RTRIM(ISNULL(@Codes, N''))) = N'' THEN 0 ELSE 1 END;
+
+    SELECT CompanyCode, TradeDate, CompanyName,
+           OpenPrice, HighPrice, LowPrice, ClosePrice, Change, TradeVolume
+    FROM   dbo.DailyQuote
+    WHERE  @hasCodes = 0
+        OR CompanyCode IN (SELECT LTRIM(RTRIM(value)) FROM STRING_SPLIT(@Codes, N','))
+    ORDER BY CompanyCode, TradeDate ASC;
+END
+GO

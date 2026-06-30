@@ -5,6 +5,7 @@ import { formatPercent } from '../utils/format'
 
 // 可排序欄位（key 對應後端 sort 參數）。點欄位表頭切換排序、再點切換升/降冪。
 const SORTABLE = {
+  swingscore: '易入手波段分',
   return: '期間累計報酬',
   sharpe: '報酬/風險比',
   volatility: '報酬波動',
@@ -106,7 +107,10 @@ onMounted(load)
     <p class="subtitle" style="margin: 0 0 14px">
       以「每元當日報酬＝漲跌 ÷ 昨收」為基礎，近一個月每日行情彙總；資料範圍：0050 與成分股。<br>
       「小資總預算」以買得起一張（1000 股）為準，篩出小資也買得起的範圍。<br>
-      想「風險最小下最容易高報」？點「<strong>報酬/風險比</strong>」欄排序（期間報酬 ÷ 波動，越高代表每單位風險換到越多報酬）。
+      點「<strong>易入手波段分</strong>」欄＝（報酬÷波動）÷波段週期×離低點程度：自動偏好「高報酬、低風險、短週期、目前接近低檔」——又快、又穩、又划算、進場點佳。
+    </p>
+    <p class="disclaimer">
+      ⚠️ 所有指標皆由<strong>過去</strong>每日行情統計推估，<strong>過去不代表未來</strong>；僅供學習與分析參考，<strong>非投資建議</strong>。投資有風險，請勿投入無法承受損失的資金。
     </p>
 
     <div class="rank-controls">
@@ -130,6 +134,11 @@ onMounted(load)
             <th>#</th>
             <th>代號</th>
             <th>名稱</th>
+            <th class="sortable" :class="{ active: sort === 'swingscore' }" @click="toggleSort('swingscore')">
+              {{ SORTABLE.swingscore }} <span class="arrow">{{ arrow('swingscore') }}</span>
+            </th>
+            <th v-if="sort === 'swingscore'">波段週期</th>
+            <th v-if="sort === 'swingscore'">區間位置</th>
             <th class="sortable" :class="{ active: sort === 'return' }" @click="toggleSort('return')">
               {{ SORTABLE.return }} <span class="arrow">{{ arrow('return') }}</span>
             </th>
@@ -155,6 +164,9 @@ onMounted(load)
             <td>{{ i + 1 }}</td>
             <td style="font-family: monospace">{{ r.companyCode }}</td>
             <td style="text-align: left">{{ r.companyName || '—' }}</td>
+            <td style="font-weight: 600; color: var(--primary, #1b5e20)">{{ r.swingScore == null ? '—' : r.swingScore.toFixed(3) }}</td>
+            <td v-if="sort === 'swingscore'">{{ r.cycleDays == null ? '—' : r.cycleDays.toFixed(1) + '天' }}</td>
+            <td v-if="sort === 'swingscore'">{{ r.pricePositionPercent == null ? '—' : r.pricePositionPercent.toFixed(0) + '%' }}</td>
             <td :class="pctClass(r.periodReturnPercent)">{{ formatPercent(r.periodReturnPercent) }}</td>
             <td :class="pctClass(r.riskAdjustedReturn)" style="font-weight: 600">{{ r.riskAdjustedReturn == null ? '—' : r.riskAdjustedReturn.toFixed(2) }}</td>
             <td>{{ r.volatilityPercent == null ? '—' : r.volatilityPercent.toFixed(2) + '%' }}</td>
@@ -218,5 +230,15 @@ th.sortable .arrow {
 }
 th.sortable.active .arrow {
   color: var(--primary, #1b5e20);
+}
+.disclaimer {
+  font-size: 0.76rem;
+  color: #b26a00;
+  background: #fff8e1;
+  border: 1px solid #ffe0a3;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 0 0 14px;
+  line-height: 1.6;
 }
 </style>

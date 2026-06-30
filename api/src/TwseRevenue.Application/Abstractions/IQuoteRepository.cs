@@ -19,4 +19,8 @@ public interface IQuoteRepository
 
     /// <summary>取個股每日序列（由舊到新），供波段分析。</summary>
     Task<IReadOnlyList<DailyQuote>> GetSeriesAsync(string companyCode, CancellationToken ct);
+
+    /// <summary>批次取多檔每日序列（依代號分組），供「易入手波段分」逐檔算週期。</summary>
+    Task<IReadOnlyDictionary<string, IReadOnlyList<DailyQuote>>> GetSeriesForCodesAsync(
+        IReadOnlyCollection<string> codes, CancellationToken ct);
 }
