@@ -30,7 +30,8 @@ async function search() {
     rows.value = await getRevenuesByCompanyCode(trimmed, controller.signal)
   } catch (e) {
     if (e.name === 'AbortError') return
-    error.value = e.message || '查詢發生未預期錯誤'
+    const base = e.message || '查詢發生未預期錯誤'
+    error.value = e.traceId ? `${base}（追蹤碼 ${e.traceId}）` : base
     rows.value = []
   } finally {
     if (inFlight === controller) {
