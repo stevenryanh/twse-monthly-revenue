@@ -19,7 +19,7 @@
    - 本機 DEV:`.env`(開發者只需 `cp .env.example .env` 一次)。
    - SIT/UAT/PROD:由 CI/CD 或 Secret Manager 注入同名環境變數 `ConnectionStrings__TwseRevenue`,自動覆寫 `appsettings.json`;**同一份程式碼**跑不同環境吃不同來源,開發者不接觸高階環境密碼。
 4. **方便性**:一次 `cp` + 之後 `./dev.sh`,不需每次手動 `dotnet user-secrets`/設環境變數;缺機密時 API 丟出**可操作的錯誤訊息**(指向 `cp .env.example .env` 與 `./dev.sh`)。
-5. **防呆網(選配)**:`.githooks/pre-commit` 軟性呼叫 `gitleaks`(裝了才掃,沒裝不擋),讓人「隨手 commit」也不怕誤推機密。
+5. **防呆網**:`.githooks/pre-commit` 軟性呼叫 `gitleaks`(裝了才掃,沒裝不擋),讓人「隨手 commit」也不怕誤推機密;**CI(`ci.yml`)再以 gitleaks 掃全歷史當硬門檻**——本地是防呆、CI 才是把關。
 
 ## 排除了什麼
 - **把密碼 commit 進 `appsettings.{Env}.json`**:即使每環境不同,仍違反「能看程式碼 ≠ 能碰資料」與合規(SOC2/ISO27001/PCI 禁止 source control 內含明文憑證),且歷史永久殘留。

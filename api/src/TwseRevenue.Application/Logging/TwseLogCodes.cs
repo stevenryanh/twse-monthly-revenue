@@ -12,14 +12,14 @@ public static class TwseLogCodes
     /// <summary>CrossCutting（layer 6）— 全域例外處理。</summary>
     public static class Errors
     {
-        public const string ValidationFailed = "W601";
-        public const string Unhandled        = "E602";
+        public const string ValidationFailed = "W601"; // 輸入驗證失敗（回 400，訊息含 Method/Path/Reason）
+        public const string Unhandled        = "E602"; // 未處理的例外（回 500，不外洩內部細節、帶 traceId）
     }
 
     /// <summary>Application（layer 3）— 營收用例。</summary>
     public static class Revenue
     {
-        public const string Upserted = "I301"; // 寫入（upsert）成功
-        public const string Queried  = "I302"; // 查詢完成（含回傳筆數）
+        public const string Upserted = "I301"; // 營收資料寫入（upsert）成功，含 CompanyCode/DataYearMonth
+        public const string Queried  = "I302"; // 營收查詢完成，含 CompanyCode/回傳筆數 Count
     }
 }

@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  secret-scan:
+    name: 機密掃描（gitleaks 硬門檻）
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 掃完整歷史
+      - name: gitleaks detect
+        run: |
+          curl -sSL https://github.com/gitleaks/gitleaks/releases/download/v8.18.4/gitleaks_8.18.4_linux_x64.tar.gz \
+            | tar -xz gitleaks
+          ./gitleaks detect --source . --redact --no-banner
+
+  api:
+    name: API 建置與測試（.NET 6）
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '6.0.x'
+      - name: dotnet test
+        run: dotnet test api/TwseRevenue.sln --configuration Release
+      - name: LOG 代碼字典防漂移
+        run: python3 scripts/gen-log-codes.py --check
+
+  web:
+    name: 前端建置
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: build
+        working-directory: web
+        run: |
+          npm ci
+          npm run build

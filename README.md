@@ -73,7 +73,10 @@ cp .env.example .env
 - **`SecurityHeadersMiddleware`**:統一基礎安全回應標頭。
 - **輸入驗證**收斂為 MediatR `ValidationBehavior`(接縫式,不散落 handler)。
 - **機密不入庫**:連線字串/密碼走 `.env`(已忽略)與環境變數 / User Secrets;repo 內無任何明文憑證。
+- **CI 硬門檻**([`.github/workflows/ci.yml`](.github/workflows/ci.yml)):gitleaks 全歷史機密掃描、`dotnet test`、前端建置、LOG 代碼字典 `--check` 防漂移。本地 `.githooks` 是防呆,CI 才是硬把關。
 - 接縫式、可水平擴充的擴充性設計詳 [decisions/006](docs/decisions/006-security-extensibility.md)。
+
+> LOG 代碼字典 `docs/LOG-CODES.md` 由 `scripts/gen-log-codes.py` 從 `TwseLogCodes.cs` **產生**(借鑑 團隊,單一真相來源、免手寫漂移);改代碼後重跑產生器,CI 以 `--check` 把關。
 
 ## 設計決策
 
