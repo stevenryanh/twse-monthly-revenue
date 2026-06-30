@@ -44,7 +44,9 @@ cp .env.example .env
 #    停止：./dev.sh stop ｜ 重啟：./dev.sh restart
 
 # 3. 匯入資料（從 TWSE OpenAPI t187ap05_L，依主鍵 upsert，可重跑）
-python3 scripts/import-twse.py
+python3 scripts/import-twse.py            # 全部上市公司
+python3 scripts/import-twse.py 2330 1101  # 只匯指定代碼
+python3 scripts/import-twse.py 0050       # 0050 自動展開為台灣50成分股
 
 # 測試：cd api && dotnet test
 ```

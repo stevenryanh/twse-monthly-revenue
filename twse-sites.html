@@ -34,6 +34,13 @@
     .copy-btn { background: none; border: 1px solid #ddd; border-radius: 6px; padding: 4px 10px; cursor: pointer; color: #666; font-size: 0.75rem; flex-shrink: 0; }
     .copy-btn:hover { background: #e8f5e9; border-color: #81c784; color: #2e7d32; }
     .copy-btn.copied { background: #e8f5e9; border-color: #81c784; color: #2e7d32; }
+    .hero { background: linear-gradient(135deg, #1b5e20, #2e7d32); border-radius: 12px; padding: 16px 18px; margin-bottom: 18px; box-shadow: 0 2px 8px rgba(27,94,32,.25); }
+    .hero-title { color: #fff; font-weight: 700; font-size: 1rem; display: flex; align-items: center; gap: 8px; }
+    .hero-sub { color: #c8e6c9; font-size: .76rem; margin: 4px 0 12px; line-height: 1.5; }
+    .hero-cmd { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,.28); border-radius: 8px; padding: 10px 12px; cursor: pointer; }
+    .hero-code { flex: 1; color: #e8f5e9; font-family: monospace; font-size: .78rem; word-break: break-all; }
+    .hero-copy { background: #fff; border: none; border-radius: 6px; padding: 6px 14px; cursor: pointer; color: #1b5e20; font-weight: 600; font-size: .78rem; flex-shrink: 0; }
+    .hero-copy.copied { background: #a5d6a7; color: #1b3d1c; }
     .note { font-size: .76rem; color: #888; background: #fff; border-radius: 10px; padding: 10px 14px; box-shadow: 0 1px 3px rgba(0,0,0,.1); margin-bottom: 10px; line-height: 1.6; }
     .note code { background: #f3f4f6; padding: 1px 5px; border-radius: 3px; font-size: .72rem; }
     .foot { color: #aaa; font-size: .72rem; text-align: center; margin: 26px 0 10px; }
@@ -42,6 +49,16 @@
 <body>
   <h1>TWSE 每月營收 — 開發站台</h1>
   <p class="sub">本機開發入口：服務連結、API 測試、常用指令。用 <code>file://</code> 直接開即可。</p>
+
+  <!-- ───── 一鍵：啟動 + 餵資料 ───── -->
+  <div class="hero">
+    <div class="hero-title">🍚 懶人一鍵：啟動服務 + 餵資料</div>
+    <div class="hero-sub">DB 是空的查不到東西？複製下面這行貼到終端機，啟動全部服務並從 TWSE 灌入營收資料。<br>只想灌某幾檔？在指令後面接代碼，例如 <code style="background:rgba(0,0,0,.25);color:#e8f5e9;padding:1px 5px;border-radius:3px">python3 scripts/import-twse.py 2330 1101</code>。</div>
+    <div class="hero-cmd" onclick="copyCmd('cmd-allinone')">
+      <span class="hero-code" id="cmd-allinone">./dev.sh && python3 scripts/import-twse.py</span>
+      <button class="hero-copy" id="copy-cmd-allinone" onclick="copyCmd('cmd-allinone',event)">複製</button>
+    </div>
+  </div>
 
   <!-- ───── 服務連結 ───── -->
   <p class="section-label">服務連結</p>
