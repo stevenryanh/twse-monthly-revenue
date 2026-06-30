@@ -1,26 +1,15 @@
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using TwseRevenue.Application.Abstractions;
-using TwseRevenue.Application.Errors;
 using TwseRevenue.Application.Queries.GetRevenueByCompanyCode;
 using TwseRevenue.Domain.Entities;
 using Xunit;
 
 namespace TwseRevenue.Tests;
 
+// 空白代號的驗證已上移至 GetRevenueByCompanyCodeValidator（見對應 ValidatorTests）。
 public class GetRevenueByCompanyCodeHandlerTests
 {
-    [Theory]
-    [InlineData("")]
-    [InlineData("   ")]
-    public async Task 公司代號空白_應拋驗證例外(string code)
-    {
-        var repo = new Mock<IRevenueRepository>();
-        var handler = new GetRevenueByCompanyCodeHandler(repo.Object);
-
-        await Assert.ThrowsAsync<ValidationException>(() =>
-            handler.Handle(new GetRevenueByCompanyCodeQuery(code), CancellationToken.None));
-    }
-
     [Fact]
     public async Task 有資料_應映射為DTO並保留關鍵欄位()
     {
@@ -38,7 +27,7 @@ public class GetRevenueByCompanyCodeHandlerTests
         var repo = new Mock<IRevenueRepository>();
         repo.Setup(r => r.GetByCompanyCodeAsync("1101", It.IsAny<CancellationToken>()))
             .ReturnsAsync(new[] { entity });
-        var handler = new GetRevenueByCompanyCodeHandler(repo.Object);
+        var handler = new GetRevenueByCompanyCodeHandler(repo.Object, NullLogger<GetRevenueByCompanyCodeHandler>.Instance);
 
         var result = await handler.Handle(new GetRevenueByCompanyCodeQuery("1101"), CancellationToken.None);
 

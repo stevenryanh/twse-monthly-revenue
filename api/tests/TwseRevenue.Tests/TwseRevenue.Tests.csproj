@@ -24,6 +24,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\TwseRevenue.Application\TwseRevenue.Application.csproj" />
+    <!-- 參考 Api 以單元測試其 middleware；FrameworkReference 提供 HttpContext 等型別。 -->
+    <ProjectReference Include="..\..\src\TwseRevenue.Api\TwseRevenue.Api.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
 </Project>
