@@ -73,6 +73,34 @@ public sealed class QuoteRepository : IQuoteRepository
         return list;
     }
 
+    public async Task<IReadOnlyList<DailyQuote>> GetSeriesAsync(string companyCode, CancellationToken ct)
+    {
+        await using var conn = _factory.Create();
+        await using var cmd = new SqlCommand("dbo.usp_DailyQuote_GetSeries", conn)
+        {
+            CommandType = CommandType.StoredProcedure,
+        };
+        cmd.Parameters.Add(new SqlParameter("@CompanyCode", SqlDbType.NVarChar, 10) { Value = companyCode });
+
+        await conn.OpenAsync(ct);
+        var list = new List<DailyQuote>();
+        await using var reader = await cmd.ExecuteReaderAsync(ct);
+        while (await reader.ReadAsync(ct))
+            list.Add(new DailyQuote
+            {
+                CompanyCode = reader.GetString(reader.GetOrdinal("CompanyCode")),
+                TradeDate = reader.GetInt32(reader.GetOrdinal("TradeDate")),
+                CompanyName = NullableString(reader, "CompanyName"),
+                OpenPrice = NullableDecimal(reader, "OpenPrice"),
+                HighPrice = NullableDecimal(reader, "HighPrice"),
+                LowPrice = NullableDecimal(reader, "LowPrice"),
+                ClosePrice = NullableDecimal(reader, "ClosePrice"),
+                Change = NullableDecimal(reader, "Change"),
+                TradeVolume = reader.IsDBNull(reader.GetOrdinal("TradeVolume")) ? null : reader.GetInt64(reader.GetOrdinal("TradeVolume")),
+            });
+        return list;
+    }
+
     private static string? NullableString(SqlDataReader r, string col)
     {
         var i = r.GetOrdinal(col);

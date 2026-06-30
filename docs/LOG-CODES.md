@@ -19,6 +19,7 @@
 | `I303` | Info | `CompaniesSearched` | 公司關鍵字搜尋完成，含 Keyword/回傳筆數 Count |
 | `I304` | Info | `Upserted` | 每日行情寫入（upsert）成功，含 CompanyCode/TradeDate |
 | `I305` | Info | `Ranked` | 買賣投報排行完成，含 Sort/Keyword/回傳筆數 Count |
+| `I306` | Info | `SwingAnalyzed` | 波段分析完成，含 CompanyCode/序列天數/轉折數 |
 
 ## CrossCutting（layer 6）
 

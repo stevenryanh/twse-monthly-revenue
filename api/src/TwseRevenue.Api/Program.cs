@@ -5,6 +5,7 @@ using TwseRevenue.Application.Behaviors;
 using TwseRevenue.Application.Commands.CreateRevenue;
 using TwseRevenue.Application.Commands.CreateQuote;
 using TwseRevenue.Application.Queries.GetRevenueByCompanyCode;
+using TwseRevenue.Application.Queries.GetSwingAnalysis;
 using TwseRevenue.Application.Queries.RankQuotes;
 using TwseRevenue.Application.Queries.SearchCompanies;
 using TwseRevenue.Application.Mapping;
@@ -47,6 +48,7 @@ builder.Services.AddScoped<IValidator<GetRevenueByCompanyCodeQuery>, GetRevenueB
 builder.Services.AddScoped<IValidator<SearchCompaniesQuery>, SearchCompaniesValidator>();
 builder.Services.AddScoped<IValidator<CreateQuoteCommand>, CreateQuoteValidator>();
 builder.Services.AddScoped<IValidator<RankQuotesQuery>, RankQuotesValidator>();
+builder.Services.AddScoped<IValidator<GetSwingAnalysisQuery>, GetSwingAnalysisValidator>();
 
 // 資料存取。連線字串不入庫：本機開發由 ./dev.sh 從 .env 注入環境變數
 // ConnectionStrings__TwseRevenue；SIT/UAT/PROD 由 CI/CD 或 Secret Manager 注入同名變數。

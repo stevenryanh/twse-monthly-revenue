@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TwseRevenue.Application.Commands.CreateQuote;
 using TwseRevenue.Application.Contracts;
+using TwseRevenue.Application.Queries.GetSwingAnalysis;
 using TwseRevenue.Application.Queries.RankQuotes;
 
 namespace TwseRevenue.Api.Controllers;
@@ -40,4 +41,10 @@ public sealed class QuotesController : ControllerBase
         [FromQuery] string? dir,
         CancellationToken ct)
         => Ok(await _mediator.Send(new RankQuotesQuery(q, codes, sort, top, maxPrice, dir), ct));
+
+    /// <summary>個股波段分析：波峰/波谷、平均週期與振幅，推估下一轉折的時間與目標價（僅供參考）。</summary>
+    [HttpGet("{companyCode}/swing")]
+    [ProducesResponseType(typeof(SwingAnalysisDto), StatusCodes.Status200OK)]
+    public async Task<ActionResult<SwingAnalysisDto>> Swing(string companyCode, CancellationToken ct)
+        => Ok(await _mediator.Send(new GetSwingAnalysisQuery(companyCode), ct));
 }

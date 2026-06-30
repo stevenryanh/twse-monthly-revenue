@@ -5,6 +5,7 @@
      3) usp_Company_Search                   關鍵字搜尋公司（自動完成）
      4) usp_DailyQuote_Upsert                每日行情寫入（依主鍵 upsert）
      5) usp_Quote_Ranking                    買賣投報排行（每元當日報酬／近月變量）
+     6) usp_DailyQuote_GetSeries             取個股每日序列（波段分析用）
    ============================================================ */
 USE TwseRevenue;
 GO
@@ -236,5 +237,23 @@ BEGIN
                        ELSE CASE WHEN FirstClose <> 0 THEN (LastClose - FirstClose) / FirstClose * 100 END END
         END DESC,
         CompanyCode;
+END
+GO
+
+/* -------- 取個股每日序列：供波段分析（波峰/波谷、週期、出手時機推估） -------- */
+IF OBJECT_ID(N'dbo.usp_DailyQuote_GetSeries', N'P') IS NOT NULL
+    DROP PROCEDURE dbo.usp_DailyQuote_GetSeries;
+GO
+CREATE PROCEDURE dbo.usp_DailyQuote_GetSeries
+    @CompanyCode NVARCHAR(10)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT CompanyCode, TradeDate, CompanyName,
+           OpenPrice, HighPrice, LowPrice, ClosePrice, Change, TradeVolume
+    FROM   dbo.DailyQuote
+    WHERE  CompanyCode = @CompanyCode      -- 參數化比對
+    ORDER BY TradeDate ASC;                -- 由舊到新，供序列分析
 END
 GO

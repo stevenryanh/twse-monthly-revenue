@@ -16,4 +16,7 @@ public interface IQuoteRepository
     /// </summary>
     Task<IReadOnlyList<QuoteRanking>> RankAsync(
         string? keyword, string? codes, string? sort, int top, decimal? maxPrice, string? dir, CancellationToken ct);
+
+    /// <summary>取個股每日序列（由舊到新），供波段分析。</summary>
+    Task<IReadOnlyList<DailyQuote>> GetSeriesAsync(string companyCode, CancellationToken ct);
 }
