@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  macOS launchd 排程：每天 18:00 執行 daily-fetch.sh，抓最新 TWSE 資料。
+  安裝：
+    cp scripts/com.twse.daily-fetch.plist ~/Library/LaunchAgents/
+    launchctl load ~/Library/LaunchAgents/com.twse.daily-fetch.plist
+  停用 / 移除：
+    launchctl unload ~/Library/LaunchAgents/com.twse.daily-fetch.plist
+  立即測試一次：
+    launchctl start com.twse.daily-fetch
+  改時間：編輯下方 Hour/Minute 後，重新 unload + load。
+  注意：筆電需醒著、Docker 需開著的當下才會抓到（睡眠時不會補跑）。
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.twse.daily-fetch</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/huangtangjian/Developer/twse-monthly-revenue/scripts/daily-fetch.sh</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/huangtangjian/Developer/twse-monthly-revenue</string>
+
+    <!-- launchd 環境精簡，補上 docker / python3 / dotnet / curl 等所在路徑 -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    </dict>
+
+    <!-- 每天 18:00（收盤後行情已更新）。要改時間改這裡 -->
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>18</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>/Users/huangtangjian/Developer/twse-monthly-revenue/logs/daily-fetch.launchd.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/huangtangjian/Developer/twse-monthly-revenue/logs/daily-fetch.launchd.log</string>
+</dict>
+</plist>
