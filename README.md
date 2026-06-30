@@ -43,6 +43,9 @@ cp .env.example .env
 ./dev.sh
 #    停止：./dev.sh stop ｜ 重啟：./dev.sh restart
 
+# 3. 匯入資料（從 TWSE OpenAPI t187ap05_L，依主鍵 upsert，可重跑）
+python3 scripts/import-twse.py
+
 # 測試：cd api && dotnet test
 ```
 

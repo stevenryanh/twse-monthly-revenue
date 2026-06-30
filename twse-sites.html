@@ -162,6 +162,13 @@
       </div>
     </li>
     <li>
+      <div class="cmd-row" onclick="copyCmd('cmd-import')">
+        <div class="cmd-icon">📥</div>
+        <span class="cmd-info"><span class="cmd-label">匯入 TWSE 營收資料（t187ap05_L，可重跑）</span><span class="cmd-code" id="cmd-import">python3 scripts/import-twse.py</span></span>
+        <button class="copy-btn" id="copy-cmd-import" onclick="copyCmd('cmd-import',event)">複製</button>
+      </div>
+    </li>
+    <li>
       <div class="cmd-row" onclick="copyCmd('cmd-initdb')">
         <div class="cmd-icon">🗄️</div>
         <span class="cmd-info"><span class="cmd-label">重建資料庫（建表 + 預存程序）</span><span class="cmd-code" id="cmd-initdb">bash scripts/init-db.sh</span></span>
