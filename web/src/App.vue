@@ -8,6 +8,16 @@ import QuoteRanking from './components/QuoteRanking.vue'
 
 const tab = ref('revenue') // 'revenue' = 個股營收查詢；'ranking' = 買賣投報排行
 
+// 分享當前網址給好友：手機跳原生分享選單（含 LINE），桌機退回 LINE 分享頁。
+function shareApp() {
+  const url = window.location.href
+  if (navigator.share) {
+    navigator.share({ title: '上市公司每月營收 / 買賣投報排行', url }).catch(() => {})
+  } else {
+    window.open('https://social-plugins.line.me/lineit/share?url=' + encodeURIComponent(url), '_blank')
+  }
+}
+
 const code = ref('')
 const rows = ref([])
 const loading = ref(false)
@@ -93,7 +103,10 @@ async function search() {
 </script>
 
 <template>
-  <h1>上市公司每月營收查詢</h1>
+  <div class="app-header">
+    <h1>上市公司每月營收查詢</h1>
+    <button class="share-btn" @click="shareApp" title="分享給好友（LINE）">📤 分享</button>
+  </div>
   <p class="subtitle">資料來源：臺灣證券交易所 OpenAPI（t187ap05_L 月營收 · STOCK_DAY 每日行情）</p>
 
   <div class="tabs">
@@ -165,6 +178,26 @@ async function search() {
 </template>
 
 <style scoped>
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.share-btn {
+  flex-shrink: 0;
+  background: #06c755;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.share-btn:hover {
+  background: #05b34c;
+}
 .tabs {
   display: flex;
   gap: 8px;
