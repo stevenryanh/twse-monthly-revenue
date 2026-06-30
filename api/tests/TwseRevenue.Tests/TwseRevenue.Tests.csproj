@@ -22,6 +22,14 @@
     </PackageReference>
   </ItemGroup>
 
+  <!-- 釘住測試工具鏈的遞移依賴到修補版，消除已知漏洞（GHSA-5crp-9r3c-p9vr 等）。
+       僅測試專案、不進正式產物；屬資安衛生。 -->
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+    <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\TwseRevenue.Application\TwseRevenue.Application.csproj" />
     <!-- 參考 Api 以單元測試其 middleware；FrameworkReference 提供 HttpContext 等型別。 -->
