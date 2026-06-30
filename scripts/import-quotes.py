@@ -10,7 +10,8 @@
     ./scripts/import-quotes.py                 # 預設：0050（ETF 本身）+ 台灣50成分股，當月
     ./scripts/import-quotes.py 2330 2317       # 指定代碼
     ./scripts/import-quotes.py 0050            # 0050 展開為 ETF + 成分股
-    YYYYMM=202605 ./scripts/import-quotes.py   # 指定月份（西元 YYYYMM）
+    MONTHS=6 ./scripts/import-quotes.py        # 抓最近 6 個月（波段分析建議 3–6 個月）
+    YYYYMM=202605 ./scripts/import-quotes.py   # 只抓指定單一月份（西元 YYYYMM）
 """
 import datetime
 import json
@@ -80,59 +81,77 @@ def fetch_month(code, yyyymmdd):
         return json.load(resp)
 
 
+def month_date_params():
+    """要抓的月份 date 參數清單（每月一個 YYYYMMDD）。
+    YYYYMM 指定 → 只抓該月；否則抓最近 MONTHS 個月（預設 3）。"""
+    if os.environ.get("YYYYMM"):
+        return [f"{os.environ['YYYYMM']}01"]
+    months = max(1, int(os.environ.get("MONTHS", "3")))
+    today = datetime.date.today()
+    out, y, m = [], today.year, today.month
+    for _ in range(months):
+        out.append(f"{y:04d}{m:02d}01")
+        m -= 1
+        if m == 0:
+            m, y = 12, y - 1
+    return out
+
+
+def import_one(code, date_param):
+    """抓單檔單月並逐日 upsert；回傳 (寫入天數, 失敗數)。stat 非 OK 回 (None, 0)。"""
+    try:
+        d = fetch_month(code, date_param)
+    except Exception:  # noqa: BLE001
+        return None, 0
+    if d.get("stat") != "OK" or not d.get("data"):
+        return None, 0
+    # title 形如「115年06月 2330 台積電   各日成交資訊」；移除固定詞後最後一段為名稱
+    name_parts = d.get("title", "").replace("各日成交資訊", "").split()
+    name = name_parts[-1][:60] if len(name_parts) >= 3 else None
+    ok = fail = 0
+    for row in d["data"]:
+        # 欄位：日期, 成交股數, 成交金額, 開盤價, 最高價, 最低價, 收盤價, 漲跌價差, 成交筆數, 註記
+        td = roc_date_to_int(row[0])
+        if td is None:
+            continue
+        vol = _num(row[1])
+        body = {
+            "companyCode": code, "tradeDate": td, "companyName": name,
+            "openPrice": _num(row[3]), "highPrice": _num(row[4]), "lowPrice": _num(row[5]),
+            "closePrice": _num(row[6]), "change": _num(row[7]),
+            "tradeVolume": int(vol) if vol is not None else None,
+        }
+        try:
+            ok += 1 if post_quote(body) else 0
+        except Exception:  # noqa: BLE001 — 匯入工具，記錄後續行
+            fail += 1
+    return ok, fail
+
+
 def main():
     codes = expand_codes(sys.argv[1:]) or INDEX_EXPANSION["0050"]
-    yyyymm = os.environ.get("YYYYMM") or datetime.date.today().strftime("%Y%m")
-    date_param = f"{yyyymm}01"  # STOCK_DAY 以該月任一日查整月
+    dates = month_date_params()
 
-    print(f"▶ 匯入 {len(codes)} 檔的每日行情（月份 {yyyymm}）→ {ENDPOINT}")
+    print(f"▶ 匯入 {len(codes)} 檔 × {len(dates)} 個月的每日行情 → {ENDPOINT}")
     total_ok = total_fail = 0
     no_data = []
     for i, code in enumerate(codes, 1):
-        try:
-            d = fetch_month(code, date_param)
-        except Exception as e:  # noqa: BLE001
-            no_data.append((code, f"fetch 失敗 {e}"))
-            continue
-        if d.get("stat") != "OK" or not d.get("data"):
-            no_data.append((code, d.get("stat", "無資料")))
-            time.sleep(0.6)
-            continue
-
-        # title 形如「115年06月 2330 台積電   各日成交資訊」；移除固定詞後最後一段為名稱
-        name_parts = d.get("title", "").replace("各日成交資訊", "").split()
-        name = name_parts[-1][:60] if len(name_parts) >= 3 else None
-
-        ok = fail = 0
-        for row in d["data"]:
-            # 欄位：日期, 成交股數, 成交金額, 開盤價, 最高價, 最低價, 收盤價, 漲跌價差, 成交筆數, 註記
-            td = roc_date_to_int(row[0])
-            if td is None:
-                continue
-            vol = _num(row[1])
-            body = {
-                "companyCode": code,
-                "tradeDate": td,
-                "companyName": name,
-                "openPrice": _num(row[3]),
-                "highPrice": _num(row[4]),
-                "lowPrice": _num(row[5]),
-                "closePrice": _num(row[6]),
-                "change": _num(row[7]),
-                "tradeVolume": int(vol) if vol is not None else None,
-            }
-            try:
-                ok += 1 if post_quote(body) else 0
-            except Exception:  # noqa: BLE001 — 匯入工具，記錄後續行
-                fail += 1
-        total_ok += ok
-        total_fail += fail
-        print(f"  [{i}/{len(codes)}] {code}: {ok} 天" + (f"（失敗 {fail}）" if fail else ""))
-        time.sleep(0.6)  # 友善節流，避免 TWSE 擋
+        code_ok = code_fail = 0
+        for dp in dates:
+            ok, fail = import_one(code, dp)
+            if ok is None:
+                no_data.append((code, dp))
+            else:
+                code_ok += ok
+                code_fail += fail
+            time.sleep(0.6)  # 友善節流，避免 TWSE 擋
+        total_ok += code_ok
+        total_fail += code_fail
+        print(f"  [{i}/{len(codes)}] {code}: {code_ok} 天" + (f"（失敗 {code_fail}）" if code_fail else ""))
 
     print(f"✓ 完成：寫入 {total_ok} 筆、失敗 {total_fail}")
     if no_data:
-        print(f"  無資料/略過 {len(no_data)} 檔：" + ", ".join(c for c, _ in no_data[:15]))
+        print(f"  部分月份無資料 {len(no_data)} 筆（屬正常，如該月尚未開市）")
 
 
 if __name__ == "__main__":

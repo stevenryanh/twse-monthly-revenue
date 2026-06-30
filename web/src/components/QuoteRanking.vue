@@ -6,6 +6,7 @@ import { formatPercent } from '../utils/format'
 // 可排序欄位（key 對應後端 sort 參數）。點欄位表頭切換排序、再點切換升/降冪。
 const SORTABLE = {
   return: '期間累計報酬',
+  sharpe: '報酬/風險比',
   volatility: '報酬波動',
   avg: '平均日報酬',
   daily: '最近一日',
@@ -19,6 +20,7 @@ const BUDGETS = [
   { label: '3 萬', value: 30000 },
   { label: '5 萬', value: 50000 },
   { label: '10 萬', value: 100000 },
+  { label: '20 萬', value: 200000 },
   { label: '30 萬', value: 300000 },
 ]
 
@@ -103,7 +105,8 @@ onMounted(load)
     <h1 style="font-size: 1.2rem; margin-bottom: 4px">買賣投報排行</h1>
     <p class="subtitle" style="margin: 0 0 14px">
       以「每元當日報酬＝漲跌 ÷ 昨收」為基礎，近一個月每日行情彙總；資料範圍：0050 與成分股。<br>
-      「小資總預算」以買得起一張（1000 股）為準，篩出小資也買得起的範圍。
+      「小資總預算」以買得起一張（1000 股）為準，篩出小資也買得起的範圍。<br>
+      想「風險最小下最容易高報」？點「<strong>報酬/風險比</strong>」欄排序（期間報酬 ÷ 波動，越高代表每單位風險換到越多報酬）。
     </p>
 
     <div class="rank-controls">
@@ -130,6 +133,9 @@ onMounted(load)
             <th class="sortable" :class="{ active: sort === 'return' }" @click="toggleSort('return')">
               {{ SORTABLE.return }} <span class="arrow">{{ arrow('return') }}</span>
             </th>
+            <th class="sortable" :class="{ active: sort === 'sharpe' }" @click="toggleSort('sharpe')">
+              {{ SORTABLE.sharpe }} <span class="arrow">{{ arrow('sharpe') }}</span>
+            </th>
             <th class="sortable" :class="{ active: sort === 'volatility' }" @click="toggleSort('volatility')">
               {{ SORTABLE.volatility }} <span class="arrow">{{ arrow('volatility') }}</span>
             </th>
@@ -150,6 +156,7 @@ onMounted(load)
             <td style="font-family: monospace">{{ r.companyCode }}</td>
             <td style="text-align: left">{{ r.companyName || '—' }}</td>
             <td :class="pctClass(r.periodReturnPercent)">{{ formatPercent(r.periodReturnPercent) }}</td>
+            <td :class="pctClass(r.riskAdjustedReturn)" style="font-weight: 600">{{ r.riskAdjustedReturn == null ? '—' : r.riskAdjustedReturn.toFixed(2) }}</td>
             <td>{{ r.volatilityPercent == null ? '—' : r.volatilityPercent.toFixed(2) + '%' }}</td>
             <td :class="pctClass(r.avgDailyReturnPercent)">{{ formatPercent(r.avgDailyReturnPercent) }}</td>
             <td :class="pctClass(r.lastDayReturnPercent)">{{ formatPercent(r.lastDayReturnPercent) }}</td>

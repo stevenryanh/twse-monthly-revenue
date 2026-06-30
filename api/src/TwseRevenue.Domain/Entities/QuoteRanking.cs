@@ -16,4 +16,5 @@ public sealed class QuoteRanking
     public decimal? AvgDailyReturnPercent { get; init; }   // 平均日報酬（%）
     public decimal? VolatilityPercent { get; init; }       // 日報酬波動度＝變量（標準差，%）
     public decimal? LastDayReturnPercent { get; init; }    // 最近一日每元報酬（%）
+    public decimal? RiskAdjustedReturn { get; init; }      // 報酬/風險比（期間報酬÷波動，類 Sharpe）
 }

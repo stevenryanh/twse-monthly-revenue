@@ -11,4 +11,5 @@ public sealed record QuoteRankingDto(
     decimal? PeriodReturnPercent,
     decimal? AvgDailyReturnPercent,
     decimal? VolatilityPercent,
-    decimal? LastDayReturnPercent);
+    decimal? LastDayReturnPercent,
+    decimal? RiskAdjustedReturn);

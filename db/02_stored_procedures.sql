@@ -210,7 +210,10 @@ BEGIN
            CAST(CASE WHEN FirstClose <> 0 THEN (LastClose - FirstClose) / FirstClose * 100 END AS DECIMAL(18,6)) AS PeriodReturnPct,
            CAST(AvgDailyRetPct   AS DECIMAL(18,6)) AS AvgDailyRetPct,
            CAST(VolatilityPct    AS DECIMAL(18,6)) AS VolatilityPct,   -- STDEV 回傳 float，轉 decimal 與其他欄位一致
-           CAST(LastDayRetPct    AS DECIMAL(18,6)) AS LastDayRetPct
+           CAST(LastDayRetPct    AS DECIMAL(18,6)) AS LastDayRetPct,
+           -- 報酬/風險比（類 Sharpe）：期間累計報酬 ÷ 報酬波動；風險每承擔一單位換得的報酬
+           CAST(CASE WHEN VolatilityPct <> 0 AND FirstClose <> 0
+                     THEN ((LastClose - FirstClose) / FirstClose * 100) / VolatilityPct END AS DECIMAL(18,6)) AS RiskAdjusted
     FROM   agg
     WHERE  (@hasKw = 0 OR CompanyCode LIKE N'%' + @kw + N'%' OR CompanyName LIKE N'%' + @kw + N'%')
       AND  (@hasCodes = 0 OR CompanyCode IN (SELECT LTRIM(RTRIM(value)) FROM STRING_SPLIT(@Codes, N',')))
@@ -222,12 +225,14 @@ BEGIN
             CASE @Sort WHEN 'volatility' THEN VolatilityPct
                        WHEN 'avg'        THEN AvgDailyRetPct
                        WHEN 'daily'      THEN LastDayRetPct
+                       WHEN 'sharpe'     THEN CASE WHEN VolatilityPct <> 0 AND FirstClose <> 0 THEN ((LastClose - FirstClose) / FirstClose * 100) / VolatilityPct END
                        ELSE CASE WHEN FirstClose <> 0 THEN (LastClose - FirstClose) / FirstClose * 100 END END
         END ASC,
         CASE WHEN @Dir = N'asc' THEN NULL ELSE
             CASE @Sort WHEN 'volatility' THEN VolatilityPct
                        WHEN 'avg'        THEN AvgDailyRetPct
                        WHEN 'daily'      THEN LastDayRetPct
+                       WHEN 'sharpe'     THEN CASE WHEN VolatilityPct <> 0 AND FirstClose <> 0 THEN ((LastClose - FirstClose) / FirstClose * 100) / VolatilityPct END
                        ELSE CASE WHEN FirstClose <> 0 THEN (LastClose - FirstClose) / FirstClose * 100 END END
         END DESC,
         CompanyCode;

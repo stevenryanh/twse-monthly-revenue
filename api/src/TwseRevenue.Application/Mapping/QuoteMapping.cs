@@ -21,5 +21,6 @@ public static class QuoteMapping
 
     public static QuoteRankingDto ToDto(this QuoteRanking e) => new(
         e.CompanyCode, e.CompanyName, e.Days, e.FirstClose, e.LastClose, e.LastDate,
-        e.PeriodReturnPercent, e.AvgDailyReturnPercent, e.VolatilityPercent, e.LastDayReturnPercent);
+        e.PeriodReturnPercent, e.AvgDailyReturnPercent, e.VolatilityPercent, e.LastDayReturnPercent,
+        e.RiskAdjustedReturn);
 }

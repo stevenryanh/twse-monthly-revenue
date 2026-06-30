@@ -68,6 +68,7 @@ public sealed class QuoteRepository : IQuoteRepository
                 AvgDailyReturnPercent = NullableDecimal(reader, "AvgDailyRetPct"),
                 VolatilityPercent = NullableDecimal(reader, "VolatilityPct"),
                 LastDayReturnPercent = NullableDecimal(reader, "LastDayRetPct"),
+                RiskAdjustedReturn = NullableDecimal(reader, "RiskAdjusted"),
             });
         return list;
     }
