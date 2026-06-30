@@ -3,12 +3,13 @@ import { ref, watch, onMounted } from 'vue'
 import { rankQuotes } from '../api/quotes'
 import { formatPercent } from '../utils/format'
 
-const SORTS = [
-  { key: 'return', label: '期間累計報酬' },
-  { key: 'volatility', label: '報酬波動（變量）' },
-  { key: 'avg', label: '平均日報酬' },
-  { key: 'daily', label: '最近一日報酬' },
-]
+// 可排序欄位（key 對應後端 sort 參數）。點欄位表頭切換排序、再點切換升/降冪。
+const SORTABLE = {
+  return: '期間累計報酬',
+  volatility: '報酬波動',
+  avg: '平均日報酬',
+  daily: '最近一日',
+}
 
 // 小資總預算：以「買得起一張(1000股)」為準 → 每股價上限 = 總預算 ÷ 1000。
 // 例：總預算 5 萬 → 每股 ≤ 50，正是金融股、台泥、中鋼等小資可負擔的範圍。
@@ -22,6 +23,7 @@ const BUDGETS = [
 ]
 
 const sort = ref('return')
+const dir = ref('desc')
 const keyword = ref('')
 const budget = ref(null)
 const rows = ref([])
@@ -30,6 +32,22 @@ const error = ref('')
 
 let inFlight = null
 let kwTimer = null
+
+// 點欄位：已是當前排序鍵 → 切換升/降冪；否則切到該鍵並預設降冪。
+function toggleSort(key) {
+  if (sort.value === key) {
+    dir.value = dir.value === 'desc' ? 'asc' : 'desc'
+  } else {
+    sort.value = key
+    dir.value = 'desc'
+  }
+}
+
+// 表頭箭頭：當前排序鍵顯示 ▼/▲；其餘可排序欄位顯示淡色 ⇅ 提示可排序。
+function arrow(key) {
+  if (sort.value !== key) return '⇅'
+  return dir.value === 'desc' ? '▼' : '▲'
+}
 
 function pctClass(v) {
   if (v == null) return ''
@@ -60,7 +78,7 @@ async function load() {
   error.value = ''
   try {
     const maxPrice = budget.value ? budget.value / 1000 : null // 總預算 → 買得起一張的每股價上限
-    rows.value = await rankQuotes({ q: keyword.value, sort: sort.value, top: 30, maxPrice }, controller.signal)
+    rows.value = await rankQuotes({ q: keyword.value, sort: sort.value, dir: dir.value, top: 30, maxPrice }, controller.signal)
   } catch (e) {
     if (e.name === 'AbortError') return
     error.value = e.message || '排行查詢失敗'
@@ -71,6 +89,7 @@ async function load() {
 }
 
 watch(sort, load)
+watch(dir, load)
 watch(budget, load)
 watch(keyword, () => {
   if (kwTimer) clearTimeout(kwTimer)
@@ -88,12 +107,6 @@ onMounted(load)
     </p>
 
     <div class="rank-controls">
-      <label>
-        排序依據
-        <select v-model="sort">
-          <option v-for="s in SORTS" :key="s.key" :value="s.key">{{ s.label }}</option>
-        </select>
-      </label>
       <label>
         小資總預算
         <select v-model="budget">
@@ -114,10 +127,18 @@ onMounted(load)
             <th>#</th>
             <th>代號</th>
             <th>名稱</th>
-            <th>期間累計報酬</th>
-            <th>報酬波動</th>
-            <th>平均日報酬</th>
-            <th>最近一日</th>
+            <th class="sortable" :class="{ active: sort === 'return' }" @click="toggleSort('return')">
+              {{ SORTABLE.return }} <span class="arrow">{{ arrow('return') }}</span>
+            </th>
+            <th class="sortable" :class="{ active: sort === 'volatility' }" @click="toggleSort('volatility')">
+              {{ SORTABLE.volatility }} <span class="arrow">{{ arrow('volatility') }}</span>
+            </th>
+            <th class="sortable" :class="{ active: sort === 'avg' }" @click="toggleSort('avg')">
+              {{ SORTABLE.avg }} <span class="arrow">{{ arrow('avg') }}</span>
+            </th>
+            <th class="sortable" :class="{ active: sort === 'daily' }" @click="toggleSort('daily')">
+              {{ SORTABLE.daily }} <span class="arrow">{{ arrow('daily') }}</span>
+            </th>
             <th>期初→期末收盤</th>
             <th>最近每張成本</th>
             <th>天數</th>
@@ -172,5 +193,23 @@ onMounted(load)
 .rank-controls select:focus,
 .rank-controls input:focus {
   border-color: var(--primary, #1b5e20);
+}
+th.sortable {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+th.sortable:hover {
+  color: var(--primary, #1b5e20);
+}
+th.sortable.active {
+  color: var(--primary, #1b5e20);
+}
+th.sortable .arrow {
+  font-size: 0.8em;
+  color: #bbb;
+}
+th.sortable.active .arrow {
+  color: var(--primary, #1b5e20);
 }
 </style>

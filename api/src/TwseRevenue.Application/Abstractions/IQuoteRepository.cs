@@ -15,5 +15,5 @@ public interface IQuoteRepository
     /// keyword（代號/名稱包含）、codes（逗號分隔代碼清單）皆可選；sort 指排序指標。
     /// </summary>
     Task<IReadOnlyList<QuoteRanking>> RankAsync(
-        string? keyword, string? codes, string? sort, int top, decimal? maxPrice, CancellationToken ct);
+        string? keyword, string? codes, string? sort, int top, decimal? maxPrice, string? dir, CancellationToken ct);
 }

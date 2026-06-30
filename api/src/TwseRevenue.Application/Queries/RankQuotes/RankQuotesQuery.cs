@@ -8,5 +8,5 @@ namespace TwseRevenue.Application.Queries.RankQuotes;
 /// Keyword/Codes/MaxPrice 為篩選（MaxPrice＝小資可負擔的每股價上限）；
 /// Sort：return（累計報酬，預設）| volatility（變量）| avg | daily。
 /// </summary>
-public sealed record RankQuotesQuery(string? Keyword, string? Codes, string? Sort, int Top, decimal? MaxPrice)
+public sealed record RankQuotesQuery(string? Keyword, string? Codes, string? Sort, int Top, decimal? MaxPrice, string? Dir)
     : IRequest<IReadOnlyList<QuoteRankingDto>>;

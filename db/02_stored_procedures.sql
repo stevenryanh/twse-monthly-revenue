@@ -171,7 +171,8 @@ CREATE PROCEDURE dbo.usp_Quote_Ranking
     @Codes    NVARCHAR(MAX) = NULL,   -- 逗號分隔代碼清單；NULL/空 = 不限
     @Sort     NVARCHAR(20)  = NULL,   -- return | volatility | avg | daily；NULL = return
     @Top      INT           = 30,
-    @MaxPrice DECIMAL(18,4) = NULL    -- 小資可負擔：最近收盤每股價上限；NULL = 不限
+    @MaxPrice DECIMAL(18,4) = NULL,   -- 小資可負擔：最近收盤每股價上限；NULL = 不限
+    @Dir      NVARCHAR(4)   = N'desc' -- 排序方向：asc | desc（預設 desc）
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -214,12 +215,20 @@ BEGIN
     WHERE  (@hasKw = 0 OR CompanyCode LIKE N'%' + @kw + N'%' OR CompanyName LIKE N'%' + @kw + N'%')
       AND  (@hasCodes = 0 OR CompanyCode IN (SELECT LTRIM(RTRIM(value)) FROM STRING_SPLIT(@Codes, N',')))
       AND  (@MaxPrice IS NULL OR LastClose <= @MaxPrice)   -- 小資可負擔：濾掉每股價超過上限者
+    -- 排序鍵取自 agg 欄位（period 報酬就地重算，因 ORDER BY 的 CASE 看不到 SELECT 別名）；
+    -- 方向用兩個互斥的 ASC/DESC 子句切換。
     ORDER BY
-        CASE @Sort
-            WHEN 'volatility' THEN VolatilityPct
-            WHEN 'avg'        THEN AvgDailyRetPct
-            WHEN 'daily'      THEN LastDayRetPct
-            ELSE CASE WHEN FirstClose <> 0 THEN (LastClose - FirstClose) / FirstClose * 100 END  -- return（預設）
+        CASE WHEN @Dir = N'asc' THEN
+            CASE @Sort WHEN 'volatility' THEN VolatilityPct
+                       WHEN 'avg'        THEN AvgDailyRetPct
+                       WHEN 'daily'      THEN LastDayRetPct
+                       ELSE CASE WHEN FirstClose <> 0 THEN (LastClose - FirstClose) / FirstClose * 100 END END
+        END ASC,
+        CASE WHEN @Dir = N'asc' THEN NULL ELSE
+            CASE @Sort WHEN 'volatility' THEN VolatilityPct
+                       WHEN 'avg'        THEN AvgDailyRetPct
+                       WHEN 'daily'      THEN LastDayRetPct
+                       ELSE CASE WHEN FirstClose <> 0 THEN (LastClose - FirstClose) / FirstClose * 100 END END
         END DESC,
         CompanyCode;
 END

@@ -17,5 +17,9 @@ public sealed class RankQuotesValidator : IValidator<RankQuotesQuery>
             throw new ValidationException("搜尋關鍵字長度不可超過 100。");
         if (query.MaxPrice is < 0)
             throw new ValidationException("可負擔每股價上限不可為負。");
+        if (!string.IsNullOrWhiteSpace(query.Dir) &&
+            !query.Dir.Equals("asc", StringComparison.OrdinalIgnoreCase) &&
+            !query.Dir.Equals("desc", StringComparison.OrdinalIgnoreCase))
+            throw new ValidationException("排序方向不正確（可用：asc、desc）。");
     }
 }

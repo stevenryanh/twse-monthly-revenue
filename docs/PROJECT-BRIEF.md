@@ -52,6 +52,9 @@ cp .env.example .env      # 填入資料庫密碼，只需一次
 |---|---|---|
 | `GET` | `/api/revenues/{companyCode}` | 以公司代號查各月營收（最新月份在前） |
 | `POST` | `/api/revenues` | 新增一筆（依主鍵 upsert，匯入可重跑） |
+| `GET` | `/api/companies?q=` | 關鍵字搜尋公司（代號或名稱片段），供自動完成 |
+| `GET` | `/api/quotes/ranking` | 買賣投報排行（每元當日報酬→累計報酬／波動／均日／單日；可排序方向、小資總預算篩選） |
+| `POST` | `/api/quotes` | 新增一筆每日行情（依主鍵 upsert） |
 
 ---
 

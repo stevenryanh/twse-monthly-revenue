@@ -104,6 +104,26 @@
       </div>
     </li>
     <li>
+      <div class="cmd-row" onclick="copyCmd('curl-search')">
+        <span class="badge get" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:10px;font-size:.72rem">GET</span>
+        <span class="cmd-info">
+          <span class="cmd-label">搜尋公司（代號或名稱片段，自動完成用）</span>
+          <span class="cmd-code" id="curl-search">curl "http://localhost:5080/api/companies?q=台積"</span>
+        </span>
+        <button class="copy-btn" id="copy-curl-search" onclick="copyCmd('curl-search',event)">複製</button>
+      </div>
+    </li>
+    <li>
+      <div class="cmd-row" onclick="copyCmd('curl-rank')">
+        <span class="badge get" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:10px;font-size:.72rem">GET</span>
+        <span class="cmd-info">
+          <span class="cmd-label">買賣投報排行（波動降冪，小資總預算 5 萬）</span>
+          <span class="cmd-code" id="curl-rank">curl "http://localhost:5080/api/quotes/ranking?sort=volatility&dir=desc&maxPrice=50&top=10"</span>
+        </span>
+        <button class="copy-btn" id="copy-curl-rank" onclick="copyCmd('curl-rank',event)">複製</button>
+      </div>
+    </li>
+    <li>
       <div class="cmd-row" onclick="copyCmd('curl-post')">
         <span class="badge post" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:10px;font-size:.7rem">POST</span>
         <span class="cmd-info">

@@ -8,15 +8,17 @@ import { apiGet } from './http'
  * @param {string} [opts.sort] return | volatility | avg | daily
  * @param {number} [opts.top] 筆數上限
  * @param {number} [opts.maxPrice] 小資可負擔的每股價上限（最近收盤）
+ * @param {string} [opts.dir] 排序方向 asc | desc
  * @param {AbortSignal} [signal]
  * @returns {Promise<Array>} QuoteRankingDto 陣列（camelCase）
  */
-export function rankQuotes({ q = '', codes = '', sort = 'return', top = 30, maxPrice = null } = {}, signal) {
+export function rankQuotes({ q = '', codes = '', sort = 'return', top = 30, maxPrice = null, dir = 'desc' } = {}, signal) {
   const params = new URLSearchParams()
   if (q.trim()) params.set('q', q.trim())
   if (codes.trim()) params.set('codes', codes.trim())
   if (sort) params.set('sort', sort)
   if (top) params.set('top', String(top))
   if (maxPrice != null) params.set('maxPrice', String(maxPrice))
+  if (dir) params.set('dir', dir)
   return apiGet(`/api/quotes/ranking?${params.toString()}`, { signal })
 }

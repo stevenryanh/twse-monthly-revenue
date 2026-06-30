@@ -37,6 +37,7 @@ public sealed class QuotesController : ControllerBase
         [FromQuery] string? sort,
         [FromQuery] int top,
         [FromQuery] decimal? maxPrice,
+        [FromQuery] string? dir,
         CancellationToken ct)
-        => Ok(await _mediator.Send(new RankQuotesQuery(q, codes, sort, top, maxPrice), ct));
+        => Ok(await _mediator.Send(new RankQuotesQuery(q, codes, sort, top, maxPrice, dir), ct));
 }
