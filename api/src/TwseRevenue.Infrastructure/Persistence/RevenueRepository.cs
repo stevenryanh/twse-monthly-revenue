@@ -47,11 +47,12 @@ public sealed class RevenueRepository : IRevenueRepository
         cmd.Parameters.Add(new SqlParameter("@CurrentMonthRevenue", SqlDbType.BigInt) { Value = (object?)r.CurrentMonthRevenue ?? DBNull.Value });
         cmd.Parameters.Add(new SqlParameter("@LastMonthRevenue", SqlDbType.BigInt) { Value = (object?)r.LastMonthRevenue ?? DBNull.Value });
         cmd.Parameters.Add(new SqlParameter("@LastYearMonthRevenue", SqlDbType.BigInt) { Value = (object?)r.LastYearMonthRevenue ?? DBNull.Value });
-        cmd.Parameters.Add(new SqlParameter("@MoMPercent", SqlDbType.Decimal) { Value = (object?)r.MoMPercent ?? DBNull.Value });
-        cmd.Parameters.Add(new SqlParameter("@YoYPercent", SqlDbType.Decimal) { Value = (object?)r.YoYPercent ?? DBNull.Value });
+        // DECIMAL(18,6)：須明設 Precision/Scale，否則 SqlParameter 預設 Scale=0 會把小數截斷成整數。
+        cmd.Parameters.Add(new SqlParameter("@MoMPercent", SqlDbType.Decimal) { Precision = 18, Scale = 6, Value = (object?)r.MoMPercent ?? DBNull.Value });
+        cmd.Parameters.Add(new SqlParameter("@YoYPercent", SqlDbType.Decimal) { Precision = 18, Scale = 6, Value = (object?)r.YoYPercent ?? DBNull.Value });
         cmd.Parameters.Add(new SqlParameter("@CumCurrentRevenue", SqlDbType.BigInt) { Value = (object?)r.CumCurrentRevenue ?? DBNull.Value });
         cmd.Parameters.Add(new SqlParameter("@CumLastYearRevenue", SqlDbType.BigInt) { Value = (object?)r.CumLastYearRevenue ?? DBNull.Value });
-        cmd.Parameters.Add(new SqlParameter("@CumDiffPercent", SqlDbType.Decimal) { Value = (object?)r.CumDiffPercent ?? DBNull.Value });
+        cmd.Parameters.Add(new SqlParameter("@CumDiffPercent", SqlDbType.Decimal) { Precision = 18, Scale = 6, Value = (object?)r.CumDiffPercent ?? DBNull.Value });
         cmd.Parameters.Add(new SqlParameter("@Remark", SqlDbType.NVarChar, 200) { Value = (object?)r.Remark ?? DBNull.Value });
 
         await conn.OpenAsync(ct);
