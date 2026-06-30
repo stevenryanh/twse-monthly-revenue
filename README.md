@@ -68,8 +68,12 @@ cp .env.example .env
 
 - 資料存取只走**參數化預存程序**,從資料層杜絕 SQL Injection。
 - `Directory.Build.props` 將 `CA2100`(SQL 注入)升為**編譯錯誤**,作為靜態第二道防線。
-- 全域 `ExceptionFilter` 統一錯誤處理:驗證錯誤 → 400,其餘 → 500 且不外洩內部細節、完整記錄 Log。
-- **機密不入庫**:連線字串/密碼走 `.env`(已忽略)與 .NET User Secrets / 環境變數;repo 內無任何明文憑證。
+- **`ExceptionHandlingMiddleware`** 統一錯誤處理:驗證錯誤 → 400,其餘 → 500 且不外洩內部細節、回傳 `traceId`、以結構化 log code 完整記錄。
+- **`CorrelationIdMiddleware` + 結構化 log code**:每請求一組 `X-Correlation-ID` 貫穿日誌(前端對稱注入),代碼字典見 [`docs/LOG-CODES.md`](docs/LOG-CODES.md)。
+- **`SecurityHeadersMiddleware`**:統一基礎安全回應標頭。
+- **輸入驗證**收斂為 MediatR `ValidationBehavior`(接縫式,不散落 handler)。
+- **機密不入庫**:連線字串/密碼走 `.env`(已忽略)與環境變數 / User Secrets;repo 內無任何明文憑證。
+- 接縫式、可水平擴充的擴充性設計詳 [decisions/006](docs/decisions/006-security-extensibility.md)。
 
 ## 設計決策
 

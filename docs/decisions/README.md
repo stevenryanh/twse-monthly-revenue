@@ -9,3 +9,4 @@
 | [003](003-data-access-ado-not-ef.md) | ADO.NET 直呼 sp,不用 EF / AutoMapper | api |
 | [004](004-frontend-stack-and-cors.md) | 前端技術選擇與開發環境 CORS | web / api |
 | [005](005-secret-management.md) | 機密管理:不入庫、單一來源、各環境隔離 | db / api / ops |
+| [006](006-security-extensibility.md) | 抗未知資安政策的接縫式架構 + 水平擴充 | api / web / 全域 |

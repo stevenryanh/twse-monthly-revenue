@@ -66,4 +66,6 @@ GET /api/revenues/2330
 ## 想深入時的下一站
 
 - 設計取捨總覽 → [`docs/decisions/`](decisions/README.md)
+- 抗未知資安政策的接縫式架構（驗證 behavior、例外/關聯ID/安全標頭 middleware、可水平擴充）→ [decisions/006](decisions/006-security-extensibility.md)
+- 日誌代碼字典（看到代碼查正體中文意義）→ [`docs/LOG-CODES.md`](LOG-CODES.md)
 - 完整啟動與機密設定 → [`README.md`](../README.md)
