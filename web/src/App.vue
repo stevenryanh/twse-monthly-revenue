@@ -1,6 +1,7 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { getRevenuesByCompanyCode } from './api/revenues'
+import { searchCompanies } from './api/companies'
 import RevenueTable from './components/RevenueTable.vue'
 import RevenueChart from './components/RevenueChart.vue'
 
@@ -15,10 +16,56 @@ let inFlight = null // 取消過期請求
 // 公司基本資料各列相同，取第一筆作摘要
 const summary = computed(() => rows.value[0] ?? null)
 
+// ── 自動完成：邊輸入邊列出符合的公司（代號或名稱的一部分）──
+const suggestions = ref([])
+const suggesting = ref(false)
+let suggestTimer = null
+let suggestController = null
+let skipNextSuggest = false // 選取候選後抑制下一次觸發
+
+// 輸入變動 → debounce 300ms → 搜尋；race-safe，只認最後一次輸入的結果。
+watch(code, (val) => {
+  if (suggestTimer) clearTimeout(suggestTimer)
+  if (skipNextSuggest) { skipNextSuggest = false; return }
+  const q = val.trim()
+  if (!q) { suggestions.value = []; suggesting.value = false; return }
+  suggesting.value = true
+  suggestTimer = setTimeout(async () => {
+    suggestController?.abort()
+    const controller = new AbortController()
+    suggestController = controller
+    try {
+      const r = await searchCompanies(q, controller.signal)
+      if (code.value.trim() !== q) return // 連打時丟棄過期結果
+      suggestions.value = r
+    } catch (e) {
+      if (e.name === 'AbortError') return
+      if (code.value.trim() === q) suggestions.value = []
+    } finally {
+      if (code.value.trim() === q) suggesting.value = false
+    }
+  }, 300)
+})
+
+function pickSuggestion(c) {
+  if (suggestTimer) clearTimeout(suggestTimer)
+  skipNextSuggest = true // 帶入代號不應再觸發搜尋
+  code.value = c.companyCode
+  suggestions.value = []
+  suggesting.value = false
+  search()
+}
+
+function hideSuggestions() {
+  // 失焦延遲關閉，讓 click 先完成（candidate 用 mousedown 已可避免，這裡是雙保險）
+  setTimeout(() => { suggestions.value = [] }, 120)
+}
+
 async function search() {
   const trimmed = code.value.trim()
   if (!trimmed || loading.value) return
 
+  suggestions.value = [] // 查詢即收起候選清單
   inFlight?.abort()
   const controller = new AbortController()
   inFlight = controller
@@ -48,13 +95,29 @@ async function search() {
 
   <div class="card">
     <div class="search-bar">
-      <input
-        v-model="code"
-        type="text"
-        inputmode="numeric"
-        placeholder="輸入公司代號，例如 2330"
-        @keyup.enter="search"
-      />
+      <div class="typeahead">
+        <input
+          v-model="code"
+          type="text"
+          placeholder="輸入代號或公司名，例如 2330 或 台積"
+          autocomplete="off"
+          @keyup.enter="search"
+          @blur="hideSuggestions"
+        />
+        <ul v-if="suggestions.length" class="suggest">
+          <li
+            v-for="c in suggestions"
+            :key="c.companyCode"
+            @mousedown.prevent="pickSuggestion(c)"
+          >
+            <span class="sg-code">{{ c.companyCode }}</span>
+            <span class="sg-name">{{ c.companyName }}</span>
+            <span class="sg-ind">{{ c.industry || '' }}</span>
+          </li>
+        </ul>
+        <p v-else-if="suggesting" class="suggest-hint">搜尋中…</p>
+        <p v-else-if="code.trim() && !loading && !searched" class="suggest-hint">查無相符公司</p>
+      </div>
       <button :disabled="loading || !code.trim()" @click="search">
         {{ loading ? '查詢中…' : '查詢' }}
       </button>
@@ -86,3 +149,70 @@ async function search() {
     </div>
   </template>
 </template>
+
+<style scoped>
+.typeahead {
+  position: relative;
+  flex: 1;
+}
+.typeahead input {
+  width: 100%;
+  box-sizing: border-box;
+}
+.suggest {
+  position: absolute;
+  z-index: 20;
+  left: 0;
+  right: 0;
+  top: calc(100% + 4px);
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  background: #fff;
+  border: 1px solid var(--border, #ddd);
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  max-height: 280px;
+  overflow-y: auto;
+}
+.suggest li {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.suggest li:hover {
+  background: #f0f7f1;
+}
+.sg-code {
+  font-family: monospace;
+  font-weight: 600;
+  color: var(--primary, #1b5e20);
+  min-width: 48px;
+}
+.sg-name {
+  flex: 1;
+  color: #222;
+}
+.sg-ind {
+  font-size: 0.78rem;
+  color: #999;
+}
+.suggest-hint {
+  position: absolute;
+  z-index: 20;
+  left: 0;
+  right: 0;
+  top: calc(100% + 4px);
+  margin: 0;
+  padding: 8px 12px;
+  background: #fff;
+  border: 1px solid var(--border, #ddd);
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  font-size: 0.82rem;
+  color: #888;
+}
+</style>

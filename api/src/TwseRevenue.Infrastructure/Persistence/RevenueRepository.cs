@@ -32,6 +32,28 @@ public sealed class RevenueRepository : IRevenueRepository
         return list;
     }
 
+    public async Task<IReadOnlyList<CompanySummary>> SearchCompaniesAsync(string keyword, CancellationToken ct)
+    {
+        await using var conn = _factory.Create();
+        await using var cmd = new SqlCommand("dbo.usp_Company_Search", conn)
+        {
+            CommandType = CommandType.StoredProcedure,
+        };
+        cmd.Parameters.Add(new SqlParameter("@Keyword", SqlDbType.NVarChar, 100) { Value = keyword });
+
+        await conn.OpenAsync(ct);
+        var list = new List<CompanySummary>();
+        await using var reader = await cmd.ExecuteReaderAsync(ct);
+        while (await reader.ReadAsync(ct))
+            list.Add(new CompanySummary
+            {
+                CompanyCode = reader.GetString(reader.GetOrdinal("CompanyCode")),
+                CompanyName = reader.GetString(reader.GetOrdinal("CompanyName")),
+                Industry = NullableString(reader, "Industry"),
+            });
+        return list;
+    }
+
     public async Task UpsertAsync(MonthlyRevenue r, CancellationToken ct)
     {
         await using var conn = _factory.Create();

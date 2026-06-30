@@ -4,6 +4,7 @@ using TwseRevenue.Application.Abstractions;
 using TwseRevenue.Application.Behaviors;
 using TwseRevenue.Application.Commands.CreateRevenue;
 using TwseRevenue.Application.Queries.GetRevenueByCompanyCode;
+using TwseRevenue.Application.Queries.SearchCompanies;
 using TwseRevenue.Application.Mapping;
 using MediatR;
 using TwseRevenue.Infrastructure.Persistence;
@@ -41,6 +42,7 @@ builder.Services.AddMediatR(cfg =>
 // 輸入驗證器（每個需驗證的 Request 註冊一個 IValidator；未驗證的 Request 自動跳過）。
 builder.Services.AddScoped<IValidator<CreateRevenueCommand>, CreateRevenueValidator>();
 builder.Services.AddScoped<IValidator<GetRevenueByCompanyCodeQuery>, GetRevenueByCompanyCodeValidator>();
+builder.Services.AddScoped<IValidator<SearchCompaniesQuery>, SearchCompaniesValidator>();
 
 // 資料存取。連線字串不入庫：本機開發由 ./dev.sh 從 .env 注入環境變數
 // ConnectionStrings__TwseRevenue；SIT/UAT/PROD 由 CI/CD 或 Secret Manager 注入同名變數。

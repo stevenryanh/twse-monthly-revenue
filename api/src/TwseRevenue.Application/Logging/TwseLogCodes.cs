@@ -19,7 +19,8 @@ public static class TwseLogCodes
     /// <summary>Application（layer 3）— 營收用例。</summary>
     public static class Revenue
     {
-        public const string Upserted = "I301"; // 營收資料寫入（upsert）成功，含 CompanyCode/DataYearMonth
-        public const string Queried  = "I302"; // 營收查詢完成，含 CompanyCode/回傳筆數 Count
+        public const string Upserted          = "I301"; // 營收資料寫入（upsert）成功，含 CompanyCode/DataYearMonth
+        public const string Queried           = "I302"; // 營收查詢完成，含 CompanyCode/回傳筆數 Count
+        public const string CompaniesSearched = "I303"; // 公司關鍵字搜尋完成，含 Keyword/回傳筆數 Count
     }
 }

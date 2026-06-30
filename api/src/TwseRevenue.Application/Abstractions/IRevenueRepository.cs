@@ -10,5 +10,8 @@ public interface IRevenueRepository
 {
     Task<IReadOnlyList<MonthlyRevenue>> GetByCompanyCodeAsync(string companyCode, CancellationToken ct);
 
+    /// <summary>關鍵字搜尋公司（代號前綴或名稱包含），供前端自動完成；回傳輕量摘要。</summary>
+    Task<IReadOnlyList<CompanySummary>> SearchCompaniesAsync(string keyword, CancellationToken ct);
+
     Task UpsertAsync(MonthlyRevenue revenue, CancellationToken ct);
 }

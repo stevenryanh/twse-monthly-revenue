@@ -2,6 +2,7 @@
    預存程序 — 全程參數化，杜絕 SQL Injection
      1) usp_MonthlyRevenue_Upsert            寫入（依主鍵 upsert，匯入可重跑）
      2) usp_MonthlyRevenue_GetByCompanyCode  以公司代號查詢
+     3) usp_Company_Search                   關鍵字搜尋公司（自動完成）
    ============================================================ */
 USE TwseRevenue;
 GO
@@ -77,5 +78,40 @@ BEGIN
     FROM   dbo.MonthlyRevenue
     WHERE  CompanyCode = @CompanyCode      -- 參數化比對，非字串拼接
     ORDER BY DataYearMonth DESC;
+END
+GO
+
+/* -------- 搜尋：依關鍵字列出符合的公司（自動完成用） --------
+   keyword 可為「代號的一部分」或「名稱的一部分」（皆為包含比對）；
+   每間公司取最新月一筆，最多 20 筆。
+   全程參數化；另把 LIKE 萬用字元（% _ [）轉義，避免使用者輸入改變比對語意。
+   排序：代號前綴 > 名稱前綴 > 其他包含，方便「打代號／打公司名開頭」時精準浮現。 */
+IF OBJECT_ID(N'dbo.usp_Company_Search', N'P') IS NOT NULL
+    DROP PROCEDURE dbo.usp_Company_Search;
+GO
+CREATE PROCEDURE dbo.usp_Company_Search
+    @Keyword NVARCHAR(100)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- 轉義 LIKE 萬用字元（用中括號轉義法，免 ESCAPE 子句）：[ → [[]、% → [%]、_ → [_]
+    DECLARE @kw NVARCHAR(200) =
+        REPLACE(REPLACE(REPLACE(@Keyword, N'[', N'[[]'), N'%', N'[%]'), N'_', N'[_]');
+
+    ;WITH latest AS (
+        SELECT CompanyCode, CompanyName, Industry,
+               ROW_NUMBER() OVER (PARTITION BY CompanyCode ORDER BY DataYearMonth DESC) AS rn
+        FROM   dbo.MonthlyRevenue
+    )
+    SELECT TOP (20) CompanyCode, CompanyName, Industry
+    FROM   latest
+    WHERE  rn = 1
+      AND  (CompanyCode LIKE N'%' + @kw + N'%' OR CompanyName LIKE N'%' + @kw + N'%')
+    ORDER BY
+        CASE WHEN CompanyCode LIKE @kw + N'%' THEN 0   -- 代號前綴最優先（打 2330）
+             WHEN CompanyName LIKE @kw + N'%' THEN 1   -- 名稱前綴次之（打「台積」）
+             ELSE 2 END,                               -- 其餘包含命中（打 33、打「積」）
+        CompanyCode;
 END
 GO

@@ -15,6 +15,9 @@ public static class RevenueMapping
         e.MoMPercent, e.YoYPercent,
         e.CumCurrentRevenue, e.CumLastYearRevenue, e.CumDiffPercent, e.Remark);
 
+    public static CompanySummaryDto ToDto(this CompanySummary e) =>
+        new(e.CompanyCode, e.CompanyName, e.Industry);
+
     public static MonthlyRevenue ToEntity(this CreateRevenueRequest r) => new()
     {
         CompanyCode = r.CompanyCode,
