@@ -10,3 +10,4 @@
 | [004](004-frontend-stack-and-cors.md) | 前端技術選擇與開發環境 CORS | web / api |
 | [005](005-secret-management.md) | 機密管理:不入庫、單一來源、各環境隔離 | db / api / ops |
 | [006](006-security-extensibility.md) | 抗未知資安政策的接縫式架構 + 水平擴充 | api / web / 全域 |
+| [007](007-tailscale-sharing.md) | 用 Tailscale 私有網路分享給可信對象,不公開到網路 | web / ops |
