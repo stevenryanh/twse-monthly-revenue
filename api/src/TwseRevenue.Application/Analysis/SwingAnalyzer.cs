@@ -96,6 +96,60 @@ public static class SwingAnalyzer
             avgAmp, nextKind, estDays, targetLo, targetHi, Disclaimer);
     }
 
+    /// <summary>
+    /// 進場時機權重（0~1，乘進易入手波段分）：偏好「離低點 × 即將見底 × 下檔有限」。
+    /// 壓低「位置高 / 還要跌很久才見底 / 推估目標遠低於現價（接刀子）」。
+    /// </summary>
+    public static decimal EntryTimingFactor(SwingAnalysisDto a)
+    {
+        var nearLow = a.PricePositionPercent.HasValue
+            ? Math.Clamp((100m - a.PricePositionPercent.Value) / 100m, 0m, 1m)
+            : 0.5m;
+
+        // 即將見底：下一轉折是波谷且天數越少越好；波峰方向（低點已過）給較低權重
+        decimal bottomSoon;
+        if (a.NextTurnKind == "trough" && a.EstDaysToNextTurn.HasValue && a.AvgCycleDays is > 0)
+        {
+            var frac = a.EstDaysToNextTurn.Value / a.AvgCycleDays.Value; // 約 0~0.5（全週期）
+            bottomSoon = Math.Clamp(1m - frac, 0.2m, 1m);
+        }
+        else
+        {
+            bottomSoon = 0.5m;
+        }
+
+        // 下檔有限：推估目標中價相對現價的跌幅，每跌 1% 扣 5%
+        decimal limitedDownside = 1m;
+        if (a.LastClose is > 0 && a.EstTargetLow.HasValue && a.EstTargetHigh.HasValue)
+        {
+            var mid = (a.EstTargetLow.Value + a.EstTargetHigh.Value) / 2m;
+            var dropPct = (a.LastClose.Value - mid) / a.LastClose.Value * 100m;
+            if (dropPct > 0) limitedDownside = Math.Clamp(1m - dropPct * 0.05m, 0.3m, 1m);
+        }
+
+        return nearLow * bottomSoon * limitedDownside;
+    }
+
+    /// <summary>進場時機標籤——讓工具敢說「現在別買、觀望」，而非硬塞一支。</summary>
+    public static string EntryTimingLabel(SwingAnalysisDto a)
+    {
+        var pos = a.PricePositionPercent;
+        var days = a.EstDaysToNextTurn;
+        decimal? dropPct = null;
+        if (a.LastClose is > 0 && a.EstTargetLow.HasValue && a.EstTargetHigh.HasValue)
+        {
+            var mid = (a.EstTargetLow.Value + a.EstTargetHigh.Value) / 2m;
+            dropPct = (a.LastClose.Value - mid) / a.LastClose.Value * 100m;
+        }
+
+        if (a.NextTurnKind == "peak" && days is <= 3) return "即將見頂·宜收手";
+        if (a.NextTurnKind == "trough" && days is <= 3 && pos is < 55m && (dropPct is null or <= 1m))
+            return "即將見底";
+        if (pos is >= 70m) return "偏高·觀望";
+        if (dropPct is > 2m) return "還會跌·觀望";
+        return "普通";
+    }
+
     private static List<(int index, decimal close, string kind)> DetectSwings(
         List<(int date, decimal close)> pts)
     {

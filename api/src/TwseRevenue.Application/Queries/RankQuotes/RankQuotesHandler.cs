@@ -61,19 +61,33 @@ public sealed class RankQuotesHandler
         foreach (var p in pool)
         {
             decimal? cycle = null, pos = null, score = null;
+            string? nextKind = null, entryLabel = null;
+            int? estDays = null;
             if (seriesByCode.TryGetValue(p.CompanyCode, out var series))
             {
                 var a = SwingAnalyzer.Analyze(p.CompanyCode, series);
                 cycle = a.AvgCycleDays;
                 pos = a.PricePositionPercent;
+                nextKind = a.NextTurnKind;
+                estDays = a.EstDaysToNextTurn;
+                entryLabel = SwingAnalyzer.EntryTimingLabel(a);
+
+                // 易入手波段分 =（報酬÷波動）÷週期 × 進場時機權重（離低點×即將見底×下檔有限）
+                if (p.RiskAdjustedReturn is > 0 && cycle is > 0)
+                {
+                    var entry = SwingAnalyzer.EntryTimingFactor(a);
+                    score = Math.Round(p.RiskAdjustedReturn.Value / cycle.Value * entry, 4);
+                }
             }
-            // 需報酬風險比 > 0、有正週期才計分；離低點程度 = (100 - 區間位置)/100
-            if (p.RiskAdjustedReturn is > 0 && cycle is > 0)
+            scored.Add(p.ToDto() with
             {
-                var entry = pos.HasValue ? (100m - pos.Value) / 100m : 1m;
-                score = Math.Round(p.RiskAdjustedReturn.Value / cycle.Value * entry, 4);
-            }
-            scored.Add(p.ToDto() with { CycleDays = cycle, PricePositionPercent = pos, SwingScore = score });
+                CycleDays = cycle,
+                PricePositionPercent = pos,
+                NextTurnKind = nextKind,
+                EstDaysToNextTurn = estDays,
+                EntryTiming = entryLabel,
+                SwingScore = score,
+            });
         }
 
         var ranked = scored

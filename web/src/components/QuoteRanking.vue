@@ -1,7 +1,15 @@
 <script setup>
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, computed } from 'vue'
 import { rankQuotes } from '../api/quotes'
 import { formatPercent } from '../utils/format'
+
+// 進場時機標籤顏色：好（綠）/ 觀望（橘）/ 收手（紅）
+function timingClass(label) {
+  if (label === '即將見底') return 'tm-good'
+  if (label === '即將見頂·宜收手') return 'tm-sell'
+  if (label && label.includes('觀望')) return 'tm-wait'
+  return ''
+}
 
 // 可排序欄位（key 對應後端 sort 參數）。點欄位表頭切換排序、再點切換升/降冪。
 const SORTABLE = {
@@ -35,6 +43,11 @@ const error = ref('')
 
 let inFlight = null
 let kwTimer = null
+
+// 「不一定要買」：若清單中沒有任何「即將見底」的好時機，提醒觀望
+const noGoodTiming = computed(() =>
+  sort.value === 'swingscore' && rows.value.length > 0 &&
+  !rows.value.some(r => r.entryTiming === '即將見底'))
 
 // 點欄位：已是當前排序鍵 → 切換升/降冪；否則切到該鍵並預設降冪。
 function toggleSort(key) {
@@ -123,6 +136,10 @@ onMounted(load)
       <input v-model="keyword" type="text" placeholder="篩選代號或名稱（可空）" autocomplete="off" />
     </div>
 
+    <div v-if="noGoodTiming" class="state" style="background:#fff3e0;color:#b26a00;border:1px solid #ffe0a3;border-radius:8px;padding:8px 12px;text-align:left">
+      🕒 目前清單中沒有「即將見底」的好時機——<strong>不一定要買，時機不對就觀望</strong>。在市場恐慌見底「之前」找機會，別在這裡硬進場。
+    </div>
+
     <div v-if="loading" class="state">排行查詢中…</div>
     <div v-else-if="error" class="state error">{{ error }}</div>
     <div v-else-if="rows.length === 0" class="state">查無符合的股票（請先以 scripts/import-quotes.py 餵入股價）。</div>
@@ -137,6 +154,7 @@ onMounted(load)
             <th class="sortable" :class="{ active: sort === 'swingscore' }" @click="toggleSort('swingscore')">
               {{ SORTABLE.swingscore }} <span class="arrow">{{ arrow('swingscore') }}</span>
             </th>
+            <th v-if="sort === 'swingscore'">進場時機</th>
             <th v-if="sort === 'swingscore'">波段週期</th>
             <th v-if="sort === 'swingscore'">區間位置</th>
             <th class="sortable" :class="{ active: sort === 'return' }" @click="toggleSort('return')">
@@ -165,6 +183,9 @@ onMounted(load)
             <td style="font-family: monospace">{{ r.companyCode }}</td>
             <td style="text-align: left">{{ r.companyName || '—' }}</td>
             <td style="font-weight: 600; color: var(--primary, #1b5e20)">{{ r.swingScore == null ? '—' : r.swingScore.toFixed(3) }}</td>
+            <td v-if="sort === 'swingscore'" :class="timingClass(r.entryTiming)">
+              {{ r.entryTiming || '—' }}<span v-if="r.estDaysToNextTurn != null" style="color:#999"> ·{{ r.estDaysToNextTurn }}天</span>
+            </td>
             <td v-if="sort === 'swingscore'">{{ r.cycleDays == null ? '—' : r.cycleDays.toFixed(1) + '天' }}</td>
             <td v-if="sort === 'swingscore'">{{ r.pricePositionPercent == null ? '—' : r.pricePositionPercent.toFixed(0) + '%' }}</td>
             <td :class="pctClass(r.periodReturnPercent)">{{ formatPercent(r.periodReturnPercent) }}</td>
@@ -241,4 +262,7 @@ th.sortable.active .arrow {
   margin: 0 0 14px;
   line-height: 1.6;
 }
+.tm-good { color: #1b5e20; font-weight: 600; }
+.tm-wait { color: #b26a00; }
+.tm-sell { color: #c62828; font-weight: 600; }
 </style>
