@@ -1,5 +1,5 @@
 <Project>
-  <!-- 比照 團隊/Directory.Build.props 的品質紀律：
+  <!-- 團隊既有的品質紀律：
        Nullable、警告即錯誤，並把關鍵 analyzer 規則（含 CA2100 SQL 注入）升為編譯錯誤。 -->
   <PropertyGroup>
     <Nullable>enable</Nullable>

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """從 TwseLogCodes.cs 產生 docs/LOG-CODES.md（單一真相來源，避免手寫漂移）。
 
-借鑑 團隊 的做法：日誌代碼字典用「產生」而非手維護，CI 以 --check 防漂移。
+日誌代碼字典用「產生」而非手維護（單一真相來源），CI 以 --check 防漂移。
 用法：
   python3 scripts/gen-log-codes.py          # 產生/覆寫 docs/LOG-CODES.md
   python3 scripts/gen-log-codes.py --check   # 檔案與來源不一致則 exit 1（供 CI）
@@ -25,7 +25,7 @@ HEADER = """# 日誌代碼字典（LOG Codes）
 > ⚠️ 本檔由 `scripts/gen-log-codes.py` 從 `api/src/TwseRevenue.Application/Logging/TwseLogCodes.cs`
 > 產生，**請勿手改**；改代碼或描述請改該 C# 檔後重跑產生器（CI 以 `--check` 把關，防漂移）。
 
-每條日誌都以一個結構化代碼開頭（精神比照 團隊 的 `結構化日誌代碼`），便於分類、grep、跨服務一致。
+每條日誌都以一個結構化代碼開頭，便於分類、grep、跨服務一致。
 **API caller / 維運人員**在日誌或錯誤回應看到代碼時，可在此查回正體中文意義。
 
 代碼格式：`{Level}{Layer}{Seq}`

@@ -3,11 +3,11 @@
 2026-06,適用:api
 
 ## 背景
-公司 團隊 家規用 EF Core,且不用 AutoMapper(手寫映射)。但本題的 DB 是**手寫 schema + 預存程序**(非 EF Code-First),且全系統只有兩支程序、少數對映物件。
+公司既有微服務家規用 EF Core,且不用 AutoMapper(手寫映射)。但本題的 DB 是**手寫 schema + 預存程序**(非 EF Code-First),且全系統只有兩支程序、少數對映物件。
 
 ## 決定
 - 用原生 **ADO.NET(`Microsoft.Data.SqlClient`)** 直接呼叫預存程序。
-- Entity ↔ DTO **手寫映射**(沿用 團隊 不用 AutoMapper 的家規)。
+- Entity ↔ DTO **手寫映射**(沿用團隊不用 AutoMapper 的家規)。
 
 ## 排除了什麼
 - **EF Core**:它為 Code-First / Migrations 而生;這裡 schema 與 sp 都是手寫,只為呼叫兩支程序而引入整套 EF,是過重且方向相反的抽象。

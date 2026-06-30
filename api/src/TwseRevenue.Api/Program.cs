@@ -10,7 +10,7 @@ using TwseRevenue.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 結構化日誌（比照 團隊 以 Serilog 為主）
+// 結構化日誌（以 Serilog 為主）
 builder.Host.UseSerilog((context, configuration) => configuration
     .MinimumLevel.Information()
     .Enrich.FromLogContext()

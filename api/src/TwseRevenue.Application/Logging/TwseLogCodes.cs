@@ -1,7 +1,7 @@
 namespace TwseRevenue.Application.Logging;
 
 /// <summary>
-/// 結構化日誌代碼（精神比照 團隊 的 結構化日誌代碼）。格式：{Level}{Layer}{Seq}。
+/// 結構化日誌代碼（每條 log 掛一個代碼，便於分類/grep/跨服務一致）。格式：{Level}{Layer}{Seq}。
 /// Level：I=Info、W=Warning、E=Error、D=Debug。
 /// Layer：1=Api/Presentation、3=Application、5=Infrastructure、6=CrossCutting。
 /// 用法：logger.LogXxx(TwseLogCodes.X.Y + " 訊息 - Field={Field}", value);

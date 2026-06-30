@@ -4,7 +4,7 @@ using TwseRevenue.Domain.Entities;
 namespace TwseRevenue.Application.Mapping;
 
 /// <summary>
-/// Entity ↔ DTO 的手寫映射（比照 團隊 家規，不引入 AutoMapper）。
+/// Entity ↔ DTO 的手寫映射（依團隊家規，不引入 AutoMapper）。
 /// 欄位數固定、轉換直白，手寫比反射映射更可讀、可除錯、零額外相依。
 /// </summary>
 public static class RevenueMapping

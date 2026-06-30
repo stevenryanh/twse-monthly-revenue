@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# TWSE 每月營收系統 —— 一鍵開發啟動器（比照 團隊 dev.sh 慣例）。
+# TWSE 每月營收系統 —— 一鍵開發啟動器（一條指令啟停整套服務）。
 # 先清 port → 啟 DB → 啟 API → 啟 Web，日誌寫入 logs/，最後印出各服務網址。
 #   ./dev.sh          # 啟動 DB + API + Web
 #   ./dev.sh stop     # 停掉 API / Web（MSSQL 容器保留資料）
