@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -33,7 +34,7 @@ public class ExceptionHandlingMiddlewareTests
         await sut.Invoke(ctx);
 
         Assert.Equal(400, ctx.Response.StatusCode);
-        Assert.Contains("代號必填", ReadBody(ctx));
+        Assert.Contains("代號必填", ReadBody(ctx), StringComparison.Ordinal);
     }
 
     [Fact]
@@ -48,9 +49,9 @@ public class ExceptionHandlingMiddlewareTests
 
         var body = ReadBody(ctx);
         Assert.Equal(500, ctx.Response.StatusCode);
-        Assert.Contains("伺服器內部錯誤", body);
-        Assert.DoesNotContain("敏感內部細節", body); // 不外洩例外訊息
-        Assert.Contains("traceId", body);
+        Assert.Contains("伺服器內部錯誤", body, StringComparison.Ordinal);
+        Assert.DoesNotContain("敏感內部細節", body, StringComparison.Ordinal); // 不外洩例外訊息
+        Assert.Contains("traceId", body, StringComparison.Ordinal);
     }
 
     [Fact]
