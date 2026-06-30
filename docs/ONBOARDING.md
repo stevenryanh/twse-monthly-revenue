@@ -61,6 +61,7 @@ GET /api/revenues/2330
 - **「SQL Injection 怎麼防?」** — 兩道防線:資料層只走參數化預存程序;再把 `CA2100` 升為**編譯錯誤**,靜態擋下任何字串拼接 SQL。
 - **「密碼怎麼管?」** — 連線字串/密碼一律不入庫:DB 密碼放 `.env`(git 忽略),API 連線字串走 .NET User Secrets / 環境變數。
 - **「為什麼前端不用 axios、ECharts 不整包匯入?」** — 只有一支端點,原生 `fetch` 足夠;ECharts 按需匯入讓 bundle 砍半。詳 [decisions/004](decisions/004-frontend-stack-and-cors.md)。
+- **「要分享給別人看,為什麼用 Tailscale 內網而不是公開出去?」** — 這是無認證、含寫入 API 的 dev server,**不能** Funnel/ngrok 公開曝險;改用 Tailscale 私有網路 + 節點共享,只授權可信對象、各自帳號,前端配合走同源 `/api` 代理讓單一網址即通。是個「依對象範圍與系統現況選對曝光面」的資安取捨。詳 [decisions/007](decisions/007-tailscale-sharing.md)。
 
 ---
 
