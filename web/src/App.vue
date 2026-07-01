@@ -5,8 +5,11 @@ import { searchCompanies } from './api/companies'
 import RevenueTable from './components/RevenueTable.vue'
 import RevenueChart from './components/RevenueChart.vue'
 import QuoteRanking from './components/QuoteRanking.vue'
+import { rankQuotes } from './api/quotes'
+import { buildWatchlistHtml, shareOrDownloadHtml } from './utils/exportWatchlist'
 
 const tab = ref('revenue') // 'revenue' = 個股營收查詢；'ranking' = 買賣投報排行
+const exporting = ref(false)
 
 // 分享當前網址給好友：手機跳原生分享選單（含 LINE），桌機退回 LINE 分享頁。
 function shareApp() {
@@ -15,6 +18,23 @@ function shareApp() {
     navigator.share({ title: '上市公司每月營收 / 買賣投報排行', url }).catch(() => {})
   } else {
     window.open('https://social-plugins.line.me/lineit/share?url=' + encodeURIComponent(url), '_blank')
+  }
+}
+
+// 匯出離線名單：就地產生自帶樣式的可攜 HTML（連不到服務的人也能看那一刻的快照）。
+const EXPORT_BUDGET = 100000 // 小資總預算 10 萬
+async function exportWatchlist() {
+  if (exporting.value) return
+  exporting.value = true
+  try {
+    const rows = await rankQuotes({ sort: 'swingscore', maxPrice: EXPORT_BUDGET / 1000, top: 20 })
+    const html = buildWatchlistHtml(rows, { budgetWan: EXPORT_BUDGET / 10000 })
+    const today = new Date().toISOString().slice(0, 10)
+    await shareOrDownloadHtml(`觀察名單_${today}.html`, html)
+  } catch (e) {
+    alert('產生名單失敗，請確認服務在跑。')
+  } finally {
+    exporting.value = false
   }
 }
 
@@ -105,7 +125,12 @@ async function search() {
 <template>
   <div class="app-header">
     <h1>上市公司每月營收查詢</h1>
-    <button class="share-btn" @click="shareApp" title="分享給好友（LINE）">📤 分享</button>
+    <div class="header-btns">
+      <button class="export-btn" :disabled="exporting" @click="exportWatchlist" title="匯出離線名單（可傳 LINE/AirDrop）">
+        {{ exporting ? '產生中…' : '📄 匯出離線名單' }}
+      </button>
+      <button class="share-btn" @click="shareApp" title="分享給好友（LINE）">📤 分享</button>
+    </div>
   </div>
   <p class="subtitle">資料來源：臺灣證券交易所 OpenAPI（t187ap05_L 月營收 · STOCK_DAY 每日行情）</p>
 
@@ -184,19 +209,38 @@ async function search() {
   justify-content: space-between;
   gap: 12px;
 }
-.share-btn {
+.header-btns {
+  display: flex;
+  gap: 8px;
   flex-shrink: 0;
-  background: #06c755;
-  color: #fff;
+}
+.share-btn,
+.export-btn {
   border: none;
   border-radius: 8px;
-  padding: 8px 16px;
-  font-size: 0.9rem;
+  padding: 8px 14px;
+  font-size: 0.88rem;
   font-weight: 600;
   cursor: pointer;
 }
+.share-btn {
+  background: #06c755;
+  color: #fff;
+}
 .share-btn:hover {
   background: #05b34c;
+}
+.export-btn {
+  background: #fff;
+  color: #1b5e20;
+  border: 1px solid #81c784;
+}
+.export-btn:hover {
+  background: #e8f5e9;
+}
+.export-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 .tabs {
   display: flex;
