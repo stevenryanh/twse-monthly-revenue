@@ -6,7 +6,7 @@ import RevenueTable from './components/RevenueTable.vue'
 import RevenueChart from './components/RevenueChart.vue'
 import QuoteRanking from './components/QuoteRanking.vue'
 import { rankQuotes } from './api/quotes'
-import { buildWatchlistHtml, shareOrDownloadHtml } from './utils/exportWatchlist'
+import { buildWatchlistPng, shareOrDownloadFile } from './utils/exportWatchlist'
 
 const tab = ref('revenue') // 'revenue' = 個股營收查詢；'ranking' = 買賣投報排行
 const exporting = ref(false)
@@ -21,16 +21,16 @@ function shareApp() {
   }
 }
 
-// 匯出離線名單：就地產生自帶樣式的可攜 HTML（連不到服務的人也能看那一刻的快照）。
+// 匯出離線名單：就地產生 PNG 圖片（LINE 吃圖片；連不到服務的人也能看那一刻的快照）。
 const EXPORT_BUDGET = 100000 // 小資總預算 10 萬
 async function exportWatchlist() {
   if (exporting.value) return
   exporting.value = true
   try {
     const rows = await rankQuotes({ sort: 'swingscore', maxPrice: EXPORT_BUDGET / 1000, top: 20 })
-    const html = buildWatchlistHtml(rows, { budgetWan: EXPORT_BUDGET / 10000 })
+    const blob = await buildWatchlistPng(rows, { budgetWan: EXPORT_BUDGET / 10000 })
     const today = new Date().toISOString().slice(0, 10)
-    await shareOrDownloadHtml(`觀察名單_${today}.html`, html)
+    await shareOrDownloadFile(`觀察名單_${today}.png`, blob)
   } catch (e) {
     alert('產生名單失敗，請確認服務在跑。')
   } finally {
@@ -126,8 +126,8 @@ async function search() {
   <div class="app-header">
     <h1>上市公司每月營收查詢</h1>
     <div class="header-btns">
-      <button class="export-btn" :disabled="exporting" @click="exportWatchlist" title="匯出離線名單（可傳 LINE/AirDrop）">
-        {{ exporting ? '產生中…' : '📄 匯出離線名單' }}
+      <button class="export-btn" :disabled="exporting" @click="exportWatchlist" title="匯出名單圖片（LINE 可直接傳）">
+        {{ exporting ? '產生中…' : '🖼️ 匯出名單圖' }}
       </button>
       <button class="share-btn" @click="shareApp" title="分享給好友（LINE）">📤 分享</button>
     </div>
