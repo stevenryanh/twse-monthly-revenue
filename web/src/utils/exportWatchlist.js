@@ -1,5 +1,6 @@
 // 把買賣投報排行匯出成「圖片(PNG)」——LINE 吃圖片(聊天室直接顯示)，不吃 HTML 檔。
 // 用 canvas 就地繪製(不加任何套件)，手機分享選單選 LINE 即當圖片傳，對方離線也看得到。
+import { poolsShort } from './etfPools'
 
 function lot(v) {
   return v == null ? '—' : `${(Number(v) * 1000 / 10000).toFixed(1)}萬`
@@ -18,7 +19,7 @@ export function buildWatchlistPng(rows, { budgetWan } = {}) {
   const bottom = rows.filter((r) => r.entryTiming === '即將見底')
   const others = rows.filter((r) => r.entryTiming !== '即將見底').slice(0, 10)
 
-  const W = 820
+  const W = 880
   const pad = 24
   const rowH = 34
   const titleH = 120
@@ -58,8 +59,9 @@ export function buildWatchlistPng(rows, { budgetWan } = {}) {
   // 欄位 x 座標
   const xCode = pad
   const xName = pad + 66
-  const xScore = pad + 230
-  const xTiming = pad + 320
+  const xPool = pad + 200
+  const xScore = pad + 300
+  const xTiming = pad + 390
   const xLot = W - pad // 右對齊
 
   function header(title) {
@@ -73,6 +75,7 @@ export function buildWatchlistPng(rows, { budgetWan } = {}) {
     ctx.font = `12px ${FONT}`
     ctx.fillText('代號', xCode, hy)
     ctx.fillText('名稱', xName, hy)
+    ctx.fillText('所屬池', xPool, hy)
     ctx.fillText('波段分', xScore, hy)
     ctx.fillText('進場時機', xTiming, hy)
     ctx.textAlign = 'right'
@@ -95,6 +98,9 @@ export function buildWatchlistPng(rows, { budgetWan } = {}) {
     ctx.fillText(r.companyCode, xCode, cy)
     ctx.fillStyle = '#222'
     ctx.fillText(r.companyName || '—', xName, cy)
+    ctx.fillStyle = '#00838f'
+    ctx.font = `12px ${FONT}`
+    ctx.fillText(poolsShort(r.companyCode), xPool, cy)
     ctx.fillStyle = '#1b5e20'
     ctx.font = `700 14px ${FONT}`
     ctx.fillText(r.swingScore == null ? '—' : String(r.swingScore), xScore, cy)
@@ -122,6 +128,12 @@ export function buildWatchlistPng(rows, { budgetWan } = {}) {
   y += 8
   header('其他高分（時機普通/偏高，僅供參考）')
   others.forEach(row)
+
+  // 圖例
+  ctx.fillStyle = '#aaa'
+  ctx.font = `11px ${FONT}`
+  ctx.textAlign = 'left'
+  ctx.fillText('所屬池：權=0050、息=0056、永=00878、波=00713（此為離線快照）', pad, y + 16)
 
   return new Promise((resolve) => canvas.toBlob((b) => resolve(b), 'image/png'))
 }

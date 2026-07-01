@@ -10,6 +10,7 @@ import { buildWatchlistPng, shareOrDownloadFile } from './utils/exportWatchlist'
 
 const tab = ref('revenue') // 'revenue' = 個股營收查詢；'ranking' = 買賣投報排行
 const exporting = ref(false)
+const exportHint = ref('')
 
 // 分享當前網址給好友：手機跳原生分享選單（含 LINE），桌機退回 LINE 分享頁。
 function shareApp() {
@@ -30,7 +31,17 @@ async function exportWatchlist() {
     const rows = await rankQuotes({ sort: 'swingscore', maxPrice: EXPORT_BUDGET / 1000, top: 20 })
     const blob = await buildWatchlistPng(rows, { budgetWan: EXPORT_BUDGET / 10000 })
     const today = new Date().toISOString().slice(0, 10)
+    // 先複製到剪貼簿：Mac 可直接 Cmd+V 貼到 LINE 桌面版（LINE Mac 不接圖片檔分享）
+    let copied = false
+    try {
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+      copied = true
+    } catch { /* 不支援剪貼簿圖片 → 略過 */ }
     await shareOrDownloadFile(`觀察名單_${today}.png`, blob)
+    exportHint.value = copied
+      ? '✓ 圖片已複製，可直接 Cmd+V 貼到 LINE 桌面版；手機分享選單也有 LINE。'
+      : '✓ 已產生圖片；手機分享選單選 LINE 即可傳。'
+    setTimeout(() => { exportHint.value = '' }, 7000)
   } catch (e) {
     alert('產生名單失敗，請確認服務在跑。')
   } finally {
@@ -132,6 +143,7 @@ async function search() {
       <button class="share-btn" @click="shareApp" title="分享給好友（LINE）">📤 分享</button>
     </div>
   </div>
+  <p v-if="exportHint" class="export-hint">{{ exportHint }}</p>
   <p class="subtitle">資料來源：臺灣證券交易所 OpenAPI（t187ap05_L 月營收 · STOCK_DAY 每日行情）</p>
 
   <div class="tabs">
@@ -241,6 +253,15 @@ async function search() {
 .export-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+.export-hint {
+  margin: 6px 0 0;
+  font-size: 0.82rem;
+  color: #2e7d32;
+  background: #e8f5e9;
+  border: 1px solid #a5d6a7;
+  border-radius: 8px;
+  padding: 6px 12px;
 }
 .tabs {
   display: flex;
