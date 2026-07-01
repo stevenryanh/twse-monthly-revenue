@@ -10,6 +10,7 @@
     ./scripts/import-quotes.py                 # 預設：0050（ETF 本身）+ 台灣50成分股，當月
     ./scripts/import-quotes.py 2330 2317       # 指定代碼
     ./scripts/import-quotes.py 0050            # 0050 展開為 ETF + 成分股
+    ./scripts/import-quotes.py pool            # 0050∪0056∪00878∪00713（每日選股範圍）
     MONTHS=6 ./scripts/import-quotes.py        # 抓最近 6 個月（波段分析建議 3–6 個月）
     YYYYMM=202605 ./scripts/import-quotes.py   # 只抓指定單一月份（西元 YYYYMM）
 """
@@ -24,16 +25,13 @@ API_BASE = os.environ.get("API_BASE", "http://localhost:5080").rstrip("/")
 ENDPOINT = f"{API_BASE}/api/quotes"
 STOCK_DAY = "https://www.twse.com.tw/exchangeReport/STOCK_DAY?response=json&date={date}&stockNo={code}"
 
-# 與 import-twse.py 同步的台灣50成分股快照（擷取日 2026-06-30）。
-TW50 = [
-    "2330", "2317", "2454", "2308", "2382", "2891", "2412", "2882", "2881", "2303",
-    "3711", "2886", "2884", "2357", "2885", "1216", "2892", "2880", "2890", "3034",
-    "2327", "2345", "3008", "2002", "2207", "2883", "1303", "1301", "2379", "3045",
-    "4904", "2887", "5880", "1101", "2603", "3037", "2301", "2395", "6505", "2912",
-    "5871", "1326", "2615", "2618", "3231", "2376", "6669", "3661", "2356", "2353",
-]
-# 0050（ETF 本身可交易、有股價）展開為 ETF + 成分股
-INDEX_EXPANSION = {"0050": ["0050"] + TW50}
+# ETF 成分股快照集中於 scripts/etf_pools.py（0050/0056/00878/00713，共用免漂移）。
+from etf_pools import ETF_CONSTITUENTS, ETF_TICKERS, constituents_union
+
+# ETF 本身可交易、有股價 → 展開為「ETF 代碼 + 其成分股」。
+# "pool" = 四檔 ETF 代碼 + 成分股聯集（每日選股範圍）。
+INDEX_EXPANSION = {etf: [etf] + members for etf, members in ETF_CONSTITUENTS.items()}
+INDEX_EXPANSION["pool"] = ETF_TICKERS + constituents_union()
 
 
 def expand_codes(args):

@@ -8,10 +8,12 @@
 用法:
     ./scripts/import-twse.py                 # 匯入全部上市公司
     ./scripts/import-twse.py 2330 1101       # 只匯入指定代碼
-    ./scripts/import-twse.py 0050            # 0050 自動展開為台灣50成分股
-    API_BASE=http://localhost:5080 ./scripts/import-twse.py 0050
+    ./scripts/import-twse.py 0050            # 0050 展開為台灣50成分股
+    ./scripts/import-twse.py 0056 00878      # 指定 ETF：展開為其成分股
+    ./scripts/import-twse.py pool            # 0050∪0056∪00878∪00713 成分股聯集
 
-註:0050 等 ETF 本身沒有「每月營收」,不在 t187ap05_L 中;指定 0050 時改餵其成分股。
+註:ETF 本身沒有「每月營收」,不在 t187ap05_L 中;指定 ETF/pool 時改餵其成分股。
+   成分快照見 scripts/etf_pools.py。
 """
 import json
 import os
@@ -22,19 +24,13 @@ SOURCE = "https://openapi.twse.com.tw/v1/opendata/t187ap05_L"
 API_BASE = os.environ.get("API_BASE", "http://localhost:5080").rstrip("/")
 ENDPOINT = f"{API_BASE}/api/revenues"
 
-# 元大台灣卓越50（0050）成分股快照 — 擷取日 2026-06-30。
-# 成分由指數公司每季（3/6/9/12月）審核調整,此為人工維護的快照而非即時抓取:
-# 比起依賴會變動/失效的外部成分股 API,快照更可重現;過期時手動更新此清單即可。
-# 全為上市營運公司,皆出現在 t187ap05_L;指定 "0050" 時自動展開為下列代碼。
-TW50 = [
-    "2330", "2317", "2454", "2308", "2382", "2891", "2412", "2882", "2881", "2303",
-    "3711", "2886", "2884", "2357", "2885", "1216", "2892", "2880", "2890", "3034",
-    "2327", "2345", "3008", "2002", "2207", "2883", "1303", "1301", "2379", "3045",
-    "4904", "2887", "5880", "1101", "2603", "3037", "2301", "2395", "6505", "2912",
-    "5871", "1326", "2615", "2618", "3231", "2376", "6669", "3661", "2356", "2353",
-]
-# 指數代碼 → 成分股展開表
-INDEX_EXPANSION = {"0050": TW50}
+# ETF 成分股快照集中於 scripts/etf_pools.py（0050/0056/00878/00713，共用免漂移）。
+from etf_pools import ETF_CONSTITUENTS, constituents_union
+
+# 指數/ETF 代碼 → 成分股展開表；"pool" = 四檔聯集。
+# 營收：ETF 本身無每月營收,故只展開為成分股(不含 ETF 代碼本身)。
+INDEX_EXPANSION = dict(ETF_CONSTITUENTS)
+INDEX_EXPANSION["pool"] = constituents_union()
 
 
 def expand_codes(args):

@@ -46,8 +46,10 @@ fi
 api_ok || { echo "✗ API 未就緒，略過本次"; [ "$STARTED_API" = 1 ] && kill "$API_PID" 2>/dev/null; exit 1; }
 
 # 3) 匯入（upsert；可用 MONTHS 調整股價抓取月數，預設 1）
+# 選股範圍：0050∪0056∪00878∪00713 聯集（pool）。營收全抓(一次 API、便宜);股價抓 pool。
 echo "▶ 匯入營收…"; python3 scripts/import-twse.py
-echo "▶ 匯入股價…"; MONTHS="${MONTHS:-1}" python3 scripts/import-quotes.py
+# MONTHS 預設 2：跨月邊界（月初）當月資料還少時,仍涵蓋上個月,不會抓空。
+echo "▶ 匯入股價（pool）…"; MONTHS="${MONTHS:-2}" python3 scripts/import-quotes.py pool
 
 # 3b) 抓完即產生當日觀察名單（趁 API 還在）
 echo "▶ 產生觀察名單…"; python3 scripts/gen-watchlist.py || echo "  （觀察名單產生失敗，略過）"
