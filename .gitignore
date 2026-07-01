@@ -14,6 +14,7 @@ logs/
 
 # 每日自動產生的觀察名單
 watchlist.md
+watchlist.html
 
 # IDE
 .vs/

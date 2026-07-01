@@ -49,6 +49,21 @@ ETF_CONSTITUENTS = {
 # 這些 ETF 本身可交易、有股價（供 import-quotes 用；營收則無）
 ETF_TICKERS = list(ETF_CONSTITUENTS.keys())
 
+# 各 ETF 的短標籤（觀察名單標示歸屬用）
+ETF_LABELS = {
+    "0050": "權值",
+    "0056": "高股息",
+    "00878": "ESG高息",
+    "00713": "高息低波",
+}
+
+
+def pools_of(code):
+    """回傳某代碼所屬的 ETF 池標籤清單；ETF 代碼本身回 ['ETF']。"""
+    if code in ETF_LABELS:
+        return ["ETF"]
+    return [label for etf, label in ETF_LABELS.items() if code in ETF_CONSTITUENTS[etf]]
+
 
 def constituents_union():
     """四檔成分股的聯集（去重、保序）。"""
